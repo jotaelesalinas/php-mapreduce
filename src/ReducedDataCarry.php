@@ -31,8 +31,9 @@ class ReducedDataCarry
         $this->carryover = $carryover;
     }
     
-    function __get($name) {
-        if($name === 'data') {
+    function __get($name)
+    {
+        if ($name === 'data') {
             return $this->_data;
         } elseif ($name === 'carryover') {
             return $this->_carryover;

@@ -3,7 +3,8 @@ namespace JLSalinas\MapReduce;
 
 use League\Event\Emitter;
 
-class MapReduce {
+class MapReduce
+{
     const EVENT_START           = 'start';
     const EVENT_FINISHED        = 'end';
     const EVENT_START_INPUT     = 'start.input';
@@ -22,16 +23,18 @@ class MapReduce {
     private $outputs    = [];
     private $emitters   = [];
     
-    public function __construct (callable $mapper, callable $reducer, $group_by = null) {
+    public function __construct(callable $mapper, callable $reducer, $group_by = null)
+    {
         $this->map($mapper);
         $this->reduce($reducer, $group_by);
     }
     
     // $input is_array() || instanceOf Traversable
     // todo: named inputs (2nd argument)
-    public function readFrom ($input) {
+    public function readFrom($input)
+    {
         // PHP, why u not add traversable as you added callable ?!
-        if ( (!is_array($input)) && (! ($input instanceOf \Traversable)) ) {
+        if ((!is_array($input)) && (! ($input instanceof \Traversable))) {
             throw new \InvalidArgumentException('Input is not an array nor Traversable.');
         }
         $this->inputs[] = $input;
@@ -39,20 +42,23 @@ class MapReduce {
     }
     
     // $output Generator (has method `send()`)
-    public function writeTo ($output) {
-        if ( !method_exists($output, 'send') ) {
+    public function writeTo($output)
+    {
+        if (!method_exists($output, 'send')) {
             throw new \InvalidArgumentException('MapReduce::writeTo() argument does not have a send() method.');
         }
         $this->outputs[] = $output;
         return $this;
     }
     
-    public function notifyEventsTo (Emitter $emitter) {
+    public function notifyEventsTo(Emitter $emitter)
+    {
         $this->emitters[] = $emitter;
         return $this;
     }
     
-    protected function map (callable $mapper) {
+    protected function map(callable $mapper)
+    {
         $this->mapper = $mapper;
         return $this;
     }
@@ -61,13 +67,15 @@ class MapReduce {
     //  - true: group by first element of mapped item
     //  - Closure: group by the value returned by the closure after passing the mapped item
     //  - string || numeric: use the value as index for the mapped item
-    protected function reduce (callable $reducer, $group_by = null) {
+    protected function reduce(callable $reducer, $group_by = null)
+    {
         $this->reducer = $reducer;
         $this->group_by = $group_by;
         return $this;
     }
     
-    protected function emit () {
+    protected function emit()
+    {
         $args = null;
         foreach ($this->emitters as $em) {
             $args = $args ?: func_get_args();
@@ -75,21 +83,29 @@ class MapReduce {
         }
     }
     
-    protected function getKeyFunction () {
-        if ( $this->group_by === true ) {
-            $func_key = function ($item) { return reset($item); };
-        } elseif ( $this->group_by instanceOf Closure ) {
+    protected function getKeyFunction()
+    {
+        if ($this->group_by === true) {
+            $func_key = function ($item) {
+                return reset($item);
+            };
+        } elseif ($this->group_by instanceof Closure) {
             $func_key = $this->group_by;
-        } elseif ( is_string($this->group_by) || is_numeric($this->group_by) ) {
+        } elseif (is_string($this->group_by) || is_numeric($this->group_by)) {
             $group_by = $this->group_by;
-            $func_key = function ($item) use ($group_by) { return $item[$group_by]; };
+            $func_key = function ($item) use ($group_by) {
+                return $item[$group_by];
+            };
         } else {
-            $func_key = function ($item) { return '__no_key__'; };
+            $func_key = function ($item) {
+                return '__no_key__';
+            };
         }
         return $func_key;
     }
     
-    protected function processInput ($input, $name) {
+    protected function processInput($input, $name)
+    {
         // $this->maper($data) does not work :(
         // http://stackoverflow.com/questions/5605404/calling-anonymous-functions-defined-as-object-variables-in-php
         $func_map = $this->mapper;
@@ -100,21 +116,21 @@ class MapReduce {
         
         $this->emit(self::EVENT_START_INPUT, $name);
         
-        foreach ( $input as $row ) {
-            if ( $row === null ) {
+        foreach ($input as $row) {
+            if ($row === null) {
                 continue;
             }
             
             $mapped = $func_map($row);
             $this->emit(self::EVENT_MAPPED, $name, $row, $mapped);
-            if ( $mapped === null ) {
+            if ($mapped === null) {
                 continue;
             }
             
             $key = $func_key($mapped);
             
             $items = [];
-            if ( isset($reduced[$key]) ) {
+            if (isset($reduced[$key])) {
                 $items[] = $reduced[$key];
             }
             $items[] = $mapped;
@@ -128,7 +144,8 @@ class MapReduce {
         return $reduced;
     }
     
-    protected function mergeInputResults ($input_results) {
+    protected function mergeInputResults($input_results)
+    {
         // $this->reducer($data) does not work :(
         // http://stackoverflow.com/questions/5605404/calling-anonymous-functions-defined-as-object-variables-in-php
         $func_reduce = $this->reducer;
@@ -139,13 +156,17 @@ class MapReduce {
         $already_reduced_keys = [];
         
         foreach ($input_results as $ir) {
-            foreach ( array_keys($ir) as $k ) {
-                if ( isset($already_reduced_keys[$k]) ) {
+            foreach (array_keys($ir) as $k) {
+                if (isset($already_reduced_keys[$k])) {
                     continue;
                 }
                 $already_reduced_keys[$k] = 1;
-                $items = array_map(function ($item) use ($k) { return isset($item[$k]) ? $item[$k] : null; }, $input_results);
-                $items = array_filter($items, function ($item) { return $item !== null; });
+                $items = array_map(function ($item) use ($k) {
+                    return isset($item[$k]) ? $item[$k] : null;
+                }, $input_results);
+                $items = array_filter($items, function ($item) {
+                    return $item !== null;
+                });
                 
                 $reduced[$k] = $func_reduce($items);
                 $this->emit(self::EVENT_REDUCED, '__merge__', $items, $reduced[$k]);
@@ -157,7 +178,8 @@ class MapReduce {
         return $reduced;
     }
     
-    public function run () {
+    public function run()
+    {
         // $this->maper($data) does not work :(
         // http://stackoverflow.com/questions/5605404/calling-anonymous-functions-defined-as-object-variables-in-php
         $func_map = $this->mapper;
@@ -168,15 +190,15 @@ class MapReduce {
         
         $reduced = array();
         
-        foreach ( $this->inputs as $n => $input ) {
+        foreach ($this->inputs as $n => $input) {
             $reduced[] = $this->processInput($input, $n + 1);
         }
         $reduced = $this->mergeInputResults($reduced);
         
         $this->emit(self::EVENT_START_OUTPUT);
         
-        foreach ( $reduced as $item ) {
-            foreach ( $this->outputs as $output ) {
+        foreach ($reduced as $item) {
+            foreach ($this->outputs as $output) {
                 $output->send($item);
             }
         }

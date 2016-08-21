@@ -28,7 +28,7 @@ class ReaderAdapter extends Reader
     public function __construct($reader, callable $transform)
     {
         // PHP, why u not add traversable as you added callable ?!
-        if ( ! is_array($reader) && ! $reader instanceOf Traversable ) {
+        if (! is_array($reader) && ! $reader instanceof Traversable) {
             throw new Exception('ReaderAdapter: $reader is not an array nor Traversable.');
         }
         $this->reader = $reader;
@@ -43,7 +43,7 @@ class ReaderAdapter extends Reader
     private function transformItems()
     {
         $trans = $this->transform;
-        foreach ( $this->reader as $item ) {
+        foreach ($this->reader as $item) {
             yield $trans($item);
         }
     }
