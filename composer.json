@@ -1,7 +1,7 @@
 {
     "name": "jotaelesalinas/php-local-mapreduce",
     "type": "library",
-    "description": "A local implementation of the map/reduce strategy in PHP.",
+    "description": "A local implementation of the map/reduce strategy in PHP",
     "keywords": [
         "jotaelesalinas",
         "jlsalinas",

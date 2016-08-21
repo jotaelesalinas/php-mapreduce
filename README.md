@@ -125,7 +125,36 @@ Please see [CONTRIBUTING](CONTRIBUTING.md) and [CONDUCT](CONDUCT.md) for details
 
 ## Security
 
-If you discover any security related issues, please email jotaelesalinas@example.com instead of using the issue tracker.
+If you discover any security related issues, please DM me to [@jotaelesalinas](http://twitter.com/jotaelesalinas) instead of using the issue tracker.
+
+## To do
+
+- [ ] Tests, tests, tests
+- [ ] Add to packagist
+- [ ] Improve docs
+    - [ ] mapping function
+    - [ ] reduce function
+    - [ ] event handling
+    - [ ] creation of a custom reader and writer
+    - [ ] readeradapter
+- [ ] Insurance example
+    - [ ] adapt to new library
+    - [ ] add insured values
+    - [ ] improve kml output (info, markers)
+- [ ] Allow buffering to avoid reducing two-by-two like now
+    - [ ] add option for max buffer size
+- [ ] Add callback to Kml writer to get point data (lat/lng, name, description, icon, etc) -- move to php-rw-generators
+- [ ] In the intro, mention [this article by Pete Warden](https://petewarden.com/2010/01/20/mapreduce-for-idiots/).
+- [ ] Also, highlight that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
+- [ ] Multithread all the things
+- [x] Make it easy to merge already reduced files -- change map to accept to items instead of one item and the carry-over
+- [x] Create a csv reader
+- [x] Create a csv writer
+- [x] Accept an array of outputs and send to all of them
+- [x] Create a kml writer
+- [x] Create a console writer
+- [x] Move `$map`, `$reduce`, `$output` and `$options` arguments from constructor to `run()`
+- [x] Accept an array of inputs and process them all in the same batch, one after the other
 
 ## Credits
 
