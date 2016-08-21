@@ -1,0 +1,61 @@
+{
+    "name": "jotaelesalinas/php-local-mapreduce",
+    "type": "library",
+    "description": "A local implementation of the map/reduce strategy in PHP.",
+    "keywords": [
+        "jotaelesalinas",
+        "jlsalinas",
+        "php-local-mapreduce",
+        "php",
+        "mapreduce",
+        "map-reduce",
+        "map",
+        "reduce",
+        "local",
+        "non-distribted"
+    ],
+    "homepage": "https://github.com/jotaelesalinas/php-local-mapreduce",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "José Luis Salinas",
+            "email": "jotaelesalinas@example.com",
+            "homepage": "http://github.com/jotaelesalinas",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": ">=5.5",
+        "jotaelesalinas/php-rwgen": "0.1",
+        "league/event": "^2.1"
+    },
+    "require-dev": {
+        "php" : ">=5.6",
+        "phpunit/phpunit" : "~4.0||~5.0",
+        "scrutinizer/ocular": "~1.1",
+        "squizlabs/php_codesniffer": "~2.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "JLSalinas\\MapReduce\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "JLSalinas\\MapReduce\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "format": "phpcbf --standard=psr2 src/",
+        "format-win": "phpcbf --standard=psr2 --no-patch src/"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
