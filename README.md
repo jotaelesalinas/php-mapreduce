@@ -7,7 +7,9 @@
 [![Quality Score][ico-code-quality]][link-code-quality]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-PSR-4 compliant library to easily do map-reduce locally, the old fashioned non-distributed way.
+PSR-4 compliant library to easily do map-reduce locally, the old-fashioned utterly-unsexy non-distributed way.
+
+
 
 ## Install
 
