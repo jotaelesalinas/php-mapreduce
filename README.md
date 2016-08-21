@@ -9,8 +9,6 @@
 
 PSR-4 compliant library to easily do map-reduce locally, the old-fashioned utterly-unsexy non-distributed way.
 
-
-
 ## Install
 
 Via Composer
@@ -21,7 +19,7 @@ $ composer require jotaelesalinas/php-local-mapreduce
 
 ## Usage
 
-A very simple example were we have a CSV with the full list of orders in our online shop
+A very simple example were we have a CSV with the full order history of an hypothetical online shop
 and we want to know the average order value.
 
 ``` php
@@ -57,8 +55,8 @@ $mapreducer = (new MapReduce($map, $reduce))
                 ->run();
 ```
 
-An example where we also read from a CSV with the full list of orders in our online shop
-and this time we want to know __for each customer__:
+Now an example where we also read from a CSV with the order history of an online shop
+and this time we want to know, _for each customer_:
 - date of the last order
 - number of orders since the beginning
 - amount spent since the beginning
@@ -131,30 +129,33 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 
 ## To do
 
-- [ ] Tests, tests, tests
-- [ ] Add to packagist
+- [ ] Test, test, test
 - [ ] Improve docs
-    - [ ] mapping function
+    - [ ] map function
     - [ ] reduce function
     - [ ] event handling
-    - [ ] creation of a custom reader and writer
+    - [ ] creation of a custom reader
     - [ ] readeradapter
+    - [ ] creation of a custom writer
 - [ ] Insurance example
     - [ ] adapt to new library
     - [ ] add insured values
     - [ ] improve kml output (info, markers)
-- [ ] Allow buffering to avoid reducing two-by-two like now
-    - [ ] add option for max buffer size
-- [ ] Add callback to Kml writer to get point data (lat/lng, name, description, icon, etc) -- move to php-rw-generators
+- [ ] Add to packagist
+- [ ] Add callback to Kml writer to get point data (lat/lng, name, description, icon, etc) --move to [php-rwgen](https://github.com/jotaelesalinas/php-rwgen)
 - [ ] In the intro, mention [this article by Pete Warden](https://petewarden.com/2010/01/20/mapreduce-for-idiots/).
 - [ ] Also, highlight that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
-- [ ] Multithread all the things
+- [ ] (Nice to have) Allow buffering to avoid reducing two-by-two like now
+    - [ ] add option for max buffer size
+- [ ] (Nice to have) Multithread all the things! If not all, at least mapping from each input and reducing. Requires pthreads.
+- [ ] (Nice to have) Pipelining: reduce while mapping.
+- [ ] Move this to-do list to [Issues](https://github.com/jotaelesalinas/php-local-mapreduce/issues)
 - [x] Make it easy to merge already reduced files -- change map to accept to items instead of one item and the carry-over
 - [x] Create a csv reader
 - [x] Create a csv writer
 - [x] Accept an array of outputs and send to all of them
 - [x] Create a kml writer
-- [x] Create a console writer
+- [x] Create a console writer (in [jotaelesalinas/php-rwgen](http://github.com/jotaelesalinas/php-rwgen))
 - [x] Move `$map`, `$reduce`, `$output` and `$options` arguments from constructor to `run()`
 - [x] Accept an array of inputs and process them all in the same batch, one after the other
 
