@@ -129,26 +129,35 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 
 ## To do
 
-- [ ] Test, test, test
+- [ ] Clear API of MapReduce to make it more PHP-ish
+    - [ ] `__construct(array|Traversable $inputs...)` accepts variable number of inputs
+    - [ ] `input(array|Traversable $input, callable $filter = null)` where $filter is applied only to this input and its signature is `bool function (mixed $item)` (like `array_filter`)
+    - [ ] `filter(callable $filter)` applied to all items before mapping --even those already filtered by an input-specific filter
+    - [ ] `map(callable $mapper)` where the signature of $mapper is `mixed function (mixed $item)` (like `array_map`)
+    - [ ] `reduce(callable $reducer)` where the signature of $reducer is `mixed function (mixed $carry, mixed $item)` (like `array_reduce`)
+    - [ ] `groupBy(bool|string|numeric|callable $group_by, $slugify = false)` where the signature of callable $group_by is `string function (mixed $item)`, string and numeric $group_by refer to the index (in this case, $item has to be an array) and if bool $group_by is true, the first element of $item is taken as group id
+- [ ] Tests, tests, tests
+- [ ] Add to packagist
 - [ ] Improve docs
+    - [ ] input
+    - [ ] creation of a custom reader
+        - [ ] Mention that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
+    - [ ] readeradapter
     - [ ] map function
     - [ ] reduce function
+    - [ ] grouping
     - [ ] event handling
-    - [ ] creation of a custom reader
-    - [ ] readeradapter
+    - [ ] output
     - [ ] creation of a custom writer
 - [ ] Insurance example
     - [ ] adapt to new library
     - [ ] add insured values
     - [ ] improve kml output (info, markers)
-- [ ] Add to packagist
 - [ ] Add callback to Kml writer to get point data (lat/lng, name, description, icon, etc) --move to [php-rwgen](https://github.com/jotaelesalinas/php-rwgen)
 - [ ] In the intro, mention [this article by Pete Warden](https://petewarden.com/2010/01/20/mapreduce-for-idiots/).
-- [ ] Also, highlight that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
-- [ ] (Nice to have) Allow buffering to avoid reducing two-by-two like now
-    - [ ] add option for max buffer size
-- [ ] (Nice to have) Multithread all the things! If not all, at least mapping from each input and reducing. Requires pthreads.
-- [ ] (Nice to have) Pipelining: reduce while mapping.
+- [ ] (Enhancement) `withBuffer(int $max_size)` to allow mapping and reducing in batches
+    - [ ] (Enhancement) Multithread (requires pthreads)
+        - [ ] (Enhancement) Pipelining: map while reading, reduce while mapping
 - [ ] Move this to-do list to [Issues](https://github.com/jotaelesalinas/php-local-mapreduce/issues)
 - [x] Make it easy to merge already reduced files -- change map to accept to items instead of one item and the carry-over
 - [x] Create a csv reader
