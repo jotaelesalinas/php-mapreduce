@@ -16,28 +16,64 @@ class MapReduce
     const EVENT_MAPPED          = 'mapped';
     const EVENT_REDUCED         = 'reduced';
     
-    private $inputs     = [];
-    private $mapper     = null;
-    private $reducer    = null;
-    private $group_by   = null;
-    private $outputs    = [];
-    private $emitters   = [];
+    protected $inputs        = [];
+    protected $mapper        = null;
+    protected $reducer       = null;
+    protected $group_by      = null;
+    protected $outputs       = [];
+    protected $emitters      = [];
     
-    public function __construct(callable $mapper, callable $reducer, $group_by = null)
+    public function __construct()
     {
-        $this->map($mapper);
-        $this->reduce($reducer, $group_by);
+        foreach ( func_get_args() as $arg ) {
+            $this->readFrom($arg);
+        }
     }
     
     // $input is_array() || instanceOf Traversable
-    // todo: named inputs (2nd argument)
+    // PHP, why u not add traversable as you added callable ?!
     public function readFrom($input)
     {
-        // PHP, why u not add traversable as you added callable ?!
         if ((!is_array($input)) && (! ($input instanceof \Traversable))) {
             throw new \InvalidArgumentException('Input is not an array nor Traversable.');
         }
         $this->inputs[] = $input;
+        return $this;
+    }
+    
+    public function map(callable $mapper)
+    {
+        $fct = new \ReflectionFunction($mapper);
+        if ($fct->getNumberOfRequiredParameters() != 1) {
+            throw new \InvalidArgumentException('Mapper function must accept one parameter.');
+        }
+        
+        $this->mapper = $mapper;
+        return $this;
+    }
+    
+    // $group_by can be:
+    //  - true: group by first element of mapped item
+    //  - Closure: group by the value returned by the closure after passing the mapped item
+    //  - string || numeric: use the value as index for the mapped item
+    public function reduce(callable $reducer, $group_by = null)
+    {
+        $fct = new \ReflectionFunction($reducer);
+        if ($fct->getNumberOfRequiredParameters() != 2) {
+            throw new \InvalidArgumentException('Reducer function must accept two parameters.');
+        }
+        
+        if ( !is_null($group_by) && !is_bool($group_by) && !is_callable($group_by) && !is_numeric($group_by) && !is_string($group_by)) {
+            throw new \InvalidArgumentException('Group_by must be bool, callable, numeric or string.');
+        } elseif (is_callable($group_by)) {
+            $fct = new \ReflectionFunction($group_by);
+            if ($fct->getNumberOfRequiredParameters() != 1) {
+                throw new \InvalidArgumentException('Group_by, when callable, must accept one parameter.');
+            }
+        }
+        
+        $this->reducer = $reducer;
+        $this->group_by = $group_by;
         return $this;
     }
     
@@ -51,26 +87,9 @@ class MapReduce
         return $this;
     }
     
-    public function notifyEventsTo(Emitter $emitter)
+    public function handleWith(Emitter $emitter)
     {
         $this->emitters[] = $emitter;
-        return $this;
-    }
-    
-    protected function map(callable $mapper)
-    {
-        $this->mapper = $mapper;
-        return $this;
-    }
-    
-    // $group_by can be:
-    //  - true: group by first element of mapped item
-    //  - Closure: group by the value returned by the closure after passing the mapped item
-    //  - string || numeric: use the value as index for the mapped item
-    protected function reduce(callable $reducer, $group_by = null)
-    {
-        $this->reducer = $reducer;
-        $this->group_by = $group_by;
         return $this;
     }
     

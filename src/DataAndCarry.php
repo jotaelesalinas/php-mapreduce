@@ -1,7 +1,7 @@
 <?php
 namespace JLSalinas\MapReduce;
 
-class ReducedDataCarry
+class DataAndCarry
 {
     /**
      * The data we want to return.
@@ -13,30 +13,33 @@ class ReducedDataCarry
     /**
      * Extra data that maz be needed to further reduce this data with other data.
      *
-     * @var mixed $_carryover
+     * @var mixed $_carry
      */
-    protected $_carryover;
+    protected $_carry;
     
     /**
-     * Create a new ReducedItem Instance
+     * Create a new DataAndCarry instance
      *
      * @param mixed $data
-     * @param mixed $carryover `null` when the data is the mapped item.
+     * @param mixed $carry `null` when the data is the mapped item.
      *                         Use different values (i.e. `null`/`false`) if you need to know when you are dealing
      *                         with a direct mapped item or with an already reduced value with no carry-over.
      */
-    public function __construct($data, $carryover = null)
+    public function __construct($data, $carry = null)
     {
         $this->data = $data;
-        $this->carryover = $carryover;
+        $this->carry = $carry;
     }
     
+    /**
+     * Magic method to retrieve both properties.
+     */
     function __get($name)
     {
         if ($name === 'data') {
             return $this->_data;
-        } elseif ($name === 'carryover') {
-            return $this->_carryover;
+        } elseif ($name === 'carry') {
+            return $this->_carry;
         }
         user_error("Invalid property: " . __CLASS__ . "->$name");
     }

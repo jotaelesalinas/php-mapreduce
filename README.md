@@ -25,38 +25,35 @@ and we want to know the average order value.
 ``` php
 use JLSalinas\MapReduce\MapReduce;
 use JLSalinas\RWGen\Readers\Csv;
-use JLSalinas\RWGen\Writers\Console as LogToConsole;
 
-$map = function($order) {
+$mapper = function($order) {
     return [
         'orders'  => 1,
         'revenue' => $order['total_amount']
     ];
 };
 
-$reduce = function ($mapped_orders) {
-    return array_reduce($mapped_orders, function ($carry, $item) {
-        if ( is_null($carry) ) {
-            $item['avg_order_value'] = $item['revenue'] / $item['orders'];
-            return $item;
-        }
-        
-        $orders          = $carry['orders'] + $item['orders'];
-        $revenue         = $carry['revenue'] + $item['revenue'];
-        $avg_order_value = $revenue / $orders;
-        
-        return compact('orders', 'revenue', 'avg_order_value');
-    });
-}
+$reducer = function ($carry, $item) {
+    if ( is_null($carry) ) {
+        $item['avg_order_value'] = $item['revenue'] / $item['orders'];
+        return $item;
+    }
+    
+    $orders          = $carry['orders'] + $item['orders'];
+    $revenue         = $carry['revenue'] + $item['revenue'];
+    $avg_order_value = $revenue / $orders;
+    
+    return compact('orders', 'revenue', 'avg_order_value');
+};
 
-$mapreducer = (new MapReduce($map, $reduce))
-                ->readFrom(new Csv('/path/to/file.csv'))
-                ->writeTo(new LogToConsole())
+$mapreducer = (new MapReduce(new Csv('/path/to/file.csv')))
+                ->map($mapper)
+                ->reduce($reducer)
                 ->run();
 ```
 
-Now an example where we also read from a CSV with the order history of an online shop
-and this time we want to know, _for each customer_:
+Now an example where we also read from a CSV with the order history of an online shop,
+writing the output to another CSV, and we want to know _for each customer_:
 - date of the last order
 - number of orders since the beginning
 - amount spent since the beginning
@@ -65,12 +62,13 @@ and this time we want to know, _for each customer_:
 - amount spent in the last 12 months
 - average order value in the last 12 months
 
+
 ``` php
 use JLSalinas\MapReduce\MapReduce;
 use JLSalinas\RWGen\Readers\Csv;
-use JLSalinas\RWGen\Writers\Console as LogToConsole;
+use JLSalinas\RWGen\Writers\Csv;
 
-$map = function($order) {
+$mapper = function($order) {
     return [
         'customer_id'      => $order['customer_id'],
         'date_last_order'  => $order['date'],
@@ -81,29 +79,28 @@ $map = function($order) {
     ];
 };
 
-$reduce = function ($mapped_orders) {
-    return array_reduce($mapped_orders, function ($carry, $item) {
-        if ( is_null($carry) ) {
-            $item['avg_revenue'] = $item['revenue'] / $item['orders'];
-            $item['avg_revenue_last_12m'] = $item['orders_last_12m'] ? $item['revenue_last_12m'] / $item['orders_last_12m'] : 0;
-            return $item;
-        }
-        
-        $date_last_order      = max($carry['date_last_order'], $item['date_last_order']);
-        $orders               = $carry['orders'] + $item['orders'];
-        $orders_last_12m      = $carry['orders_last_12m'] + $item['orders_last_12m'];
-        $revenue              = $carry['revenue'] + $item['revenue'];
-        $revenue_last_12m     = $carry['revenue_last_12m'] + $item['revenue_last_12m'];
-        $avg_revenue          = $revenue / $orders;
-        $avg_revenue_last_12m = $orders_last_12m > 0 ? $revenue_last_12m / $orders_last_12m : 0;
-        
-        return compact('date_last_order', 'orders', 'orders_last_12m', 'revenue', 'revenue_last_12m', 'avg_revenue', 'avg_revenue_last_12m');
-    });
-}
+$reducer = function ($carry, $item) {
+    if ( is_null($carry) ) {
+        $item['avg_revenue'] = $item['revenue'] / $item['orders'];
+        $item['avg_revenue_last_12m'] = $item['orders_last_12m'] ? $item['revenue_last_12m'] / $item['orders_last_12m'] : 0;
+        return $item;
+    }
+    
+    $date_last_order      = max($carry['date_last_order'], $item['date_last_order']);
+    $orders               = $carry['orders'] + $item['orders'];
+    $orders_last_12m      = $carry['orders_last_12m'] + $item['orders_last_12m'];
+    $revenue              = $carry['revenue'] + $item['revenue'];
+    $revenue_last_12m     = $carry['revenue_last_12m'] + $item['revenue_last_12m'];
+    $avg_revenue          = $revenue / $orders;
+    $avg_revenue_last_12m = $orders_last_12m > 0 ? $revenue_last_12m / $orders_last_12m : 0;
+    
+    return compact('date_last_order', 'orders', 'orders_last_12m', 'revenue', 'revenue_last_12m', 'avg_revenue', 'avg_revenue_last_12m');
+};
 
-$mapreducer = (new MapReduce($map, $reduce, true))
-                ->readFrom(new Csv('/path/to/file.csv'))
-                ->writeTo(new LogToConsole())
+$mapreducer = (new MapReduce(new Csv('/path/to/input_file.csv')))
+                ->map($mapper)
+                ->reduce($reducer, true)
+                ->writeTo(new Csv('/path/to/output_file.csv'))
                 ->run();
 ```
 
@@ -129,16 +126,13 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 
 ## To do
 
-- [ ] Clear API of MapReduce to make it more PHP-ish
-    - [ ] `__construct(array|Traversable $inputs...)` accepts variable number of inputs
-    - [ ] `input(array|Traversable $input, callable $filter = null)` where $filter is applied only to this input and its signature is `bool function (mixed $item)` (like `array_filter`)
-    - [ ] `filter(callable $filter)` applied to all items before mapping --even those already filtered by an input-specific filter
-    - [ ] `map(callable $mapper)` where the signature of $mapper is `mixed function (mixed $item)` (like `array_map`)
-    - [ ] `reduce(callable $reducer)` where the signature of $reducer is `mixed function (mixed $carry, mixed $item)` (like `array_reduce`)
-    - [ ] `groupBy(bool|string|numeric|callable $group_by, $slugify = false)` where the signature of callable $group_by is `string function (mixed $item)`, string and numeric $group_by refer to the index (in this case, $item has to be an array) and if bool $group_by is true, the first element of $item is taken as group id
+- [ ] Output to stdin by default -JSON?
 - [ ] Tests, tests, tests
+    - [ ] MapReduce
+    - [x] ReaderAdapter
+    - [x] DataAndCarry
 - [ ] Add to packagist
-- [ ] Improve docs
+- [ ] Add docs
     - [ ] input
     - [ ] creation of a custom reader
         - [ ] Mention that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).

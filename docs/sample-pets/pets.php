@@ -194,24 +194,23 @@ $adapter_ancient = new ReaderAdapter($pets_ancient, function ($item) {
 echo "===============================================================\n";
 echo "CLASSIC REDUCE - THERE CAN BE ONLY ONE\n";
 echo "===============================================================\n";
-$mapreducer = (new MapReduce($mapper, $reducer))
-                ->readFrom($pets_cloud)
-                ->readFrom($pets_csv)
+$mapreducer = (new MapReduce($pets_cloud, $pets_csv))
                 // ->readFrom($pets_ancient) would fail because the structure is not the expected
                 ->readFrom($adapter_ancient) // that's why we use an adapter
+                ->setMapperReducer($mapper, $reducer)
                 ->writeTo(new LogToConsole())
-                ->notifyEventsTo($emitter)
+                ->handleWith($emitter)
                 ->run();
 echo "\n";
 
 echo "===============================================================\n";
 echo "REDUCE GROUPING BY FIRST COLUMN\n";
 echo "===============================================================\n";
-$mapreducer = (new MapReduce($mapper, $reducer, true))
-                ->readFrom($pets_cloud)
-                ->readFrom($pets_csv)
-                ->readFrom($adapter_ancient)
+$mapreducer = (new MapReduce($pets_cloud, $pets_csv))
+                // ->readFrom($pets_ancient) would fail because the structure is not the expected
+                ->readFrom($adapter_ancient) // that's why we use an adapter
+                ->setMapperReducer($mapper, $reducer, true)
                 ->writeTo(new LogToConsole())
-                ->notifyEventsTo($emitter)
+                ->handleWith($emitter)
                 ->run();
 echo "\n";
