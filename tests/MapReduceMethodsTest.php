@@ -4,8 +4,9 @@ namespace JLSalinas\MapReduce\Tests;
 
 use JLSalinas\MapReduce\MapReduce;
 use JLSalinas\RWGen\Readers\Csv;
+use JLSalinas\RWGen\Writers;
 
-class MapReduceTest extends \PHPUnit_Framework_TestCase
+class MapReduceMethodsTest extends \PHPUnit_Framework_TestCase
 {
     protected static $data = [
         [ 'first_name' => 'susanna', 'last_name' => 'connor',  'gender' => 'f', 'age' => '20'],
@@ -190,5 +191,31 @@ class MapReduceTest extends \PHPUnit_Framework_TestCase
         $mr1->reduce(function ($a, $b) {
         }, function () {
         });
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Output does not have a send() method.
+     */
+    public function testOutputNonClass()
+    {
+        $mr1 = new MapReduce();
+        $mr1->writeTo(123);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Output does not have a send() method.
+     */
+    public function testOutputNoSendMethod()
+    {
+        $mr1 = new MapReduce();
+        $mr1->writeTo(new \DateTime());
+    }
+    
+    public function testOutputOk()
+    {
+        $mr1 = new MapReduce();
+        $mr1->writeTo(new Writers\Csv('__asdf.qwre'));
     }
 }

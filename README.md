@@ -126,11 +126,8 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 
 ## To do
 
-- [ ] Output to stdin by default -JSON?
 - [ ] Tests, tests, tests
     - [ ] MapReduce
-    - [x] ReaderAdapter
-    - [x] DataAndCarry
 - [ ] Add to packagist
 - [ ] Add docs
     - [ ] input
@@ -153,14 +150,6 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
     - [ ] (Enhancement) Multithread (requires pthreads)
         - [ ] (Enhancement) Pipelining: map while reading, reduce while mapping
 - [ ] Move this to-do list to [Issues](https://github.com/jotaelesalinas/php-local-mapreduce/issues)
-- [x] Make it easy to merge already reduced files -- change map to accept to items instead of one item and the carry-over
-- [x] Create a csv reader
-- [x] Create a csv writer
-- [x] Accept an array of outputs and send to all of them
-- [x] Create a kml writer
-- [x] Create a console writer (in [jotaelesalinas/php-rwgen](http://github.com/jotaelesalinas/php-rwgen))
-- [x] Move `$map`, `$reduce`, `$output` and `$options` arguments from constructor to `run()`
-- [x] Accept an array of inputs and process them all in the same batch, one after the other
 
 ## Credits
 

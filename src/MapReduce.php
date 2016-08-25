@@ -2,6 +2,7 @@
 namespace JLSalinas\MapReduce;
 
 use League\Event\Emitter;
+use JLSalinas\RWGen\Writers\Console;
 
 class MapReduce
 {
@@ -80,8 +81,8 @@ class MapReduce
     // $output Generator (has method `send()`)
     public function writeTo($output)
     {
-        if (!method_exists($output, 'send')) {
-            throw new \InvalidArgumentException('MapReduce::writeTo() argument does not have a send() method.');
+        if (!is_object($output) || !method_exists($output, 'send')) {
+            throw new \InvalidArgumentException('Output does not have a send() method.');
         }
         $this->outputs[] = $output;
         return $this;
@@ -123,6 +124,7 @@ class MapReduce
         return $func_key;
     }
     
+    /*
     protected function processInput($input, $name)
     {
         // $this->maper($data) does not work :(
@@ -148,14 +150,12 @@ class MapReduce
             
             $key = $func_key($mapped);
             
-            $items = [];
-            if (isset($reduced[$key])) {
-                $items[] = $reduced[$key];
+            if (!isset($reduced[$key])) {
+                $reduced[$key] = null;
             }
-            $items[] = $mapped;
             
-            $reduced[$key] = $func_reduce($items);
-            $this->emit(self::EVENT_REDUCED, $name, $items, $reduced[$key]);
+            $reduced[$key] = $func_reduce($reduced[$key], $mapped);
+            $this->emit(self::EVENT_REDUCED, $name, $mapped, $reduced[$key]);
         }
         
         $this->emit(self::EVENT_FINISHED_INPUT, $name);
@@ -196,25 +196,52 @@ class MapReduce
         
         return $reduced;
     }
+    */
     
     public function run()
     {
+        $this->emit(self::EVENT_START);
+        
         // $this->maper($data) does not work :(
         // http://stackoverflow.com/questions/5605404/calling-anonymous-functions-defined-as-object-variables-in-php
         $func_map = $this->mapper;
         $func_reduce = $this->reducer;
         $func_key = $this->getKeyFunction();
         
-        $this->emit(self::EVENT_START);
-        
         $reduced = array();
         
-        foreach ($this->inputs as $n => $input) {
-            $reduced[] = $this->processInput($input, $n + 1);
+        foreach ($this->inputs as $name => $input) {
+            $this->emit(self::EVENT_START_INPUT, $name);
+            
+            foreach ($input as $row) {
+                if ($row === null) {
+                    continue;
+                }
+                
+                $mapped = $func_map($row);
+                $this->emit(self::EVENT_MAPPED, $name, $row, $mapped);
+                if ($mapped === null) {
+                    continue;
+                }
+                
+                $key = $func_key($mapped);
+                
+                if (!isset($reduced[$key])) {
+                    $reduced[$key] = null;
+                }
+                
+                $reduced[$key] = $func_reduce($reduced[$key], $mapped);
+                $this->emit(self::EVENT_REDUCED, $name, $mapped, $reduced[$key]);
+            }
+            
+            $this->emit(self::EVENT_FINISHED_INPUT, $name);
         }
-        $reduced = $this->mergeInputResults($reduced);
         
         $this->emit(self::EVENT_START_OUTPUT);
+        
+        if (count($this->outputs) == 0) {
+            $this->writeTo(new Console());
+        }
         
         foreach ($reduced as $item) {
             foreach ($this->outputs as $output) {
