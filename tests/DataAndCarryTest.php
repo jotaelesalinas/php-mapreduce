@@ -1,6 +1,7 @@
 <?php
 
 namespace JLSalinas\MapReduce\Tests;
+
 use JLSalinas\MapReduce\DataAndCarry;
 
 class DataAndCarryTest extends \PHPUnit_Framework_TestCase
@@ -8,7 +9,7 @@ class DataAndCarryTest extends \PHPUnit_Framework_TestCase
     protected static $data = [1, 2, 3];
     protected static $carry = ['a', 'b'];
     
-    public function testDataWithNull ()
+    public function testDataWithNull()
     {
         $dc1 = new DataAndCarry(1);
         $this->assertTrue($dc1->data === 1);
@@ -19,7 +20,7 @@ class DataAndCarryTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($dc2->carry === null);
     }
     
-    public function testDataWithSomething ()
+    public function testDataWithSomething()
     {
         $dc1 = new DataAndCarry(self::$data, self::$carry);
         $this->assertTrue(is_array($dc1->data));
@@ -32,5 +33,4 @@ class DataAndCarryTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($dc1->carry[0] === 'a');
         $this->assertTrue($dc1->carry[1] === 'b');
     }
-    
 }

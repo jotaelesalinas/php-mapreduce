@@ -28,7 +28,7 @@ class ReaderAdapter extends Reader
     public function __construct($reader, callable $transform)
     {
         // PHP, why u not add traversable as you added callable ?!
-        if ( (! is_array($reader)) && (! ($reader instanceof \Traversable)) ) {
+        if ((! is_array($reader)) && (! ($reader instanceof \Traversable))) {
             throw new \InvalidArgumentException('ReaderAdapter: $reader is not an array nor Traversable.');
         }
         $this->reader = $reader;

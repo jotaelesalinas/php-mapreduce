@@ -25,7 +25,7 @@ class MapReduce
     
     public function __construct()
     {
-        foreach ( func_get_args() as $arg ) {
+        foreach (func_get_args() as $arg) {
             $this->readFrom($arg);
         }
     }
@@ -63,7 +63,7 @@ class MapReduce
             throw new \InvalidArgumentException('Reducer function must accept two parameters.');
         }
         
-        if ( !is_null($group_by) && !is_bool($group_by) && !is_callable($group_by) && !is_numeric($group_by) && !is_string($group_by)) {
+        if (!is_null($group_by) && !is_bool($group_by) && !is_callable($group_by) && !is_numeric($group_by) && !is_string($group_by)) {
             throw new \InvalidArgumentException('Group_by must be bool, callable, numeric or string.');
         } elseif (is_callable($group_by)) {
             $fct = new \ReflectionFunction($group_by);

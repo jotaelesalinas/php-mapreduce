@@ -1,6 +1,7 @@
 <?php
 
 namespace JLSalinas\MapReduce\Tests;
+
 use JLSalinas\MapReduce\MapReduce;
 use JLSalinas\RWGen\Readers\Csv;
 
@@ -20,7 +21,7 @@ class MapReduceTest extends \PHPUnit_Framework_TestCase
         [ 'first_name' => 'mike',    'last_name' => 'angus',   'gender' => 'm', 'age' => '40'],
     ];
     
-    public function testInputAcceptsArrayOrTraversable ()
+    public function testInputAcceptsArrayOrTraversable()
     {
         $mr1 = new MapReduce(self::$data);
         $this->assertTrue(!!$mr1);
@@ -31,7 +32,7 @@ class MapReduceTest extends \PHPUnit_Framework_TestCase
         @unlink($f);
     }
     
-    public function testInputAcceptsMixedArrayAndTraversable ()
+    public function testInputAcceptsMixedArrayAndTraversable()
     {
         $f = tempnam('/tmp', 'tmp');
         $mr1 = new MapReduce(self::$data, new Csv($f));
@@ -43,15 +44,16 @@ class MapReduceTest extends \PHPUnit_Framework_TestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage Input is not an array nor Traversable.
      */
-    public function testInputFailsOnNotArrayOrTraversable ()
+    public function testInputFailsOnNotArrayOrTraversable()
     {
         $mr = new MapReduce(new \DateTime());
     }
     
-    public function testMapAcceptsCallableWithOneParameter ()
+    public function testMapAcceptsCallableWithOneParameter()
     {
         $mr1 = new MapReduce();
-        $mr1->map(function($item){});
+        $mr1->map(function ($item) {
+        });
         $this->assertTrue(!!$mr1);
     }
     
@@ -59,17 +61,18 @@ class MapReduceTest extends \PHPUnit_Framework_TestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage Mapper function must accept one parameter.
      */
-    public function testMapFailsOnCallableNotOneParameter ()
+    public function testMapFailsOnCallableNotOneParameter()
     {
         $mr1 = new MapReduce();
-        $mr1->map(function(){});
+        $mr1->map(function () {
+        });
         $this->assertTrue(!!$mr1);
     }
     
     /**
      * @expectedException TypeError
      */
-    public function testMapFailsOnNonCallable ()
+    public function testMapFailsOnNonCallable()
     {
         $mr1 = new MapReduce();
         $mr1->map(self::$data);
@@ -79,17 +82,18 @@ class MapReduceTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException TypeError
      */
-    public function testMapFailsOnNoArgument ()
+    public function testMapFailsOnNoArgument()
     {
         $mr1 = new MapReduce();
         $mr1->map();
         $this->assertTrue(!!$mr1);
     }
     
-    public function testReduceAcceptsCallableWithTwoParameters ()
+    public function testReduceAcceptsCallableWithTwoParameters()
     {
         $mr1 = new MapReduce();
-        $mr1->reduce(function($carry, $item){ });
+        $mr1->reduce(function ($carry, $item) {
+        });
         $this->assertTrue(!!$mr1);
     }
     
@@ -97,10 +101,11 @@ class MapReduceTest extends \PHPUnit_Framework_TestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage Reducer function must accept two parameters.
      */
-    public function testReduceFailsOnCallableWithOneParameter ()
+    public function testReduceFailsOnCallableWithOneParameter()
     {
         $mr1 = new MapReduce();
-        $mr1->reduce(function($a){});
+        $mr1->reduce(function ($a) {
+        });
         $this->assertTrue(!!$mr1);
     }
     
@@ -108,10 +113,11 @@ class MapReduceTest extends \PHPUnit_Framework_TestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage Reducer function must accept two parameters.
      */
-    public function testReduceFailsOnCallableWithThreeParameters ()
+    public function testReduceFailsOnCallableWithThreeParameters()
     {
         $mr1 = new MapReduce();
-        $mr1->reduce(function($a, $b, $c){});
+        $mr1->reduce(function ($a, $b, $c) {
+        });
         $this->assertTrue(!!$mr1);
     }
     
@@ -119,17 +125,18 @@ class MapReduceTest extends \PHPUnit_Framework_TestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage Reducer function must accept two parameters.
      */
-    public function testReduceFailsOnCallableWithoutParameters ()
+    public function testReduceFailsOnCallableWithoutParameters()
     {
         $mr1 = new MapReduce();
-        $mr1->reduce(function(){});
+        $mr1->reduce(function () {
+        });
         $this->assertTrue(!!$mr1);
     }
     
     /**
      * @expectedException TypeError
      */
-    public function testReduceFailsOnNonCallable ()
+    public function testReduceFailsOnNonCallable()
     {
         $mr1 = new MapReduce();
         $mr1->reduce(self::$data);
@@ -139,7 +146,7 @@ class MapReduceTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException TypeError
      */
-    public function testReduceFailsOnNoArgument ()
+    public function testReduceFailsOnNoArgument()
     {
         $mr1 = new MapReduce();
         $mr1->reduce();
@@ -150,30 +157,38 @@ class MapReduceTest extends \PHPUnit_Framework_TestCase
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage Group_by must be bool, callable, numeric or string.
      */
-    public function testReduceWrongGroupType ()
+    public function testReduceWrongGroupType()
     {
         $mr1 = new MapReduce();
-        $mr1->reduce(function($a, $b){}, [123]);
+        $mr1->reduce(function ($a, $b) {
+        }, [123]);
     }
     
-    public function testReduceGoodGroupType ()
+    public function testReduceGoodGroupType()
     {
         $mr1 = new MapReduce();
-        $mr1->reduce(function($a, $b){}, true);
-        $mr1->reduce(function($a, $b){}, 'asdf');
-        $mr1->reduce(function($a, $b){}, '1');
-        $mr1->reduce(function($a, $b){}, 2);
-        $mr1->reduce(function($a, $b){}, function($item){});
+        $mr1->reduce(function ($a, $b) {
+        }, true);
+        $mr1->reduce(function ($a, $b) {
+        }, 'asdf');
+        $mr1->reduce(function ($a, $b) {
+        }, '1');
+        $mr1->reduce(function ($a, $b) {
+        }, 2);
+        $mr1->reduce(function ($a, $b) {
+        }, function ($item) {
+        });
     }
 
     /**
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage Group_by, when callable, must accept one parameter.
      */
-    public function testReduceWrongGroupParametersWhenCallable ()
+    public function testReduceWrongGroupParametersWhenCallable()
     {
         $mr1 = new MapReduce();
-        $mr1->reduce(function($a, $b){}, function(){});
+        $mr1->reduce(function ($a, $b) {
+        }, function () {
+        });
     }
-
 }
