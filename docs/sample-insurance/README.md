@@ -24,8 +24,8 @@ and export the data to a CSV file and a Google Maps KML file.
 
 ### TO DO
 
-- compute total insured value 2011
-- compute average insured value 2011
-- compute total insured value 2012
-- compute average insured value 2012
-- compute growth in %
+- [ ] compute total insured value 2011
+- [ ] compute average insured value 2011
+- [ ] compute total insured value 2012
+- [ ] compute average insured value 2012
+- [ ] compute growth in %
