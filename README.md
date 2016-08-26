@@ -141,8 +141,6 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
     - [ ] adapt to new library
     - [ ] add insured values
     - [ ] improve kml output (info, markers)
-- [ ] Add callback to Kml writer to get point data (lat/lng, name, description, icon, etc) --move to [php-rwgen](https://github.com/jotaelesalinas/php-rwgen)
-- [ ] In the intro, mention [this article by Pete Warden](https://petewarden.com/2010/01/20/mapreduce-for-idiots/).
 - [ ] (Enhancement) `withBuffer(int $max_size)` to allow mapping and reducing in batches
     - [ ] (Enhancement) Multithread (requires pthreads)
         - [ ] (Enhancement) Pipelining: map while reading, reduce while mapping

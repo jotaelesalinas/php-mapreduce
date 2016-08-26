@@ -31,6 +31,12 @@ class ReaderAdapter extends Reader
         if ((! is_array($reader)) && (! ($reader instanceof \Traversable))) {
             throw new \InvalidArgumentException('ReaderAdapter: $reader is not an array nor Traversable.');
         }
+        
+        $fct = new \ReflectionFunction($transform);
+        if ($fct->getNumberOfRequiredParameters() != 1) {
+            throw new \InvalidArgumentException('Transform function must accept one parameter.');
+        }
+        
         $this->reader = $reader;
         $this->transform = $transform;
     }

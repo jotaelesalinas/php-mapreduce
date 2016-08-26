@@ -36,6 +36,19 @@ class ReaderAdapterTest extends \PHPUnit_Framework_TestCase
     }
     
     /**
+     * @expectedException InvalidArgumentException
+     * @expectedExceptionMessage Transform function must accept one parameter.
+     */
+    public function testTransformWithNoParameters()
+    {
+        $f = tempnam('/tmp', 'tmp');
+        $ra = new ReaderAdapter(new Csv($f), function () {
+            return [1,2,3];
+        });
+        @unlink($f);
+    }
+    
+    /**
      * @expectedException Exception
      * @expectedExceptionMessage Input file does not exist: adsfasdf.csv
      */
