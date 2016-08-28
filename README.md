@@ -126,7 +126,7 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 
 - [ ] Tests events in MapReduce
 - [ ] Add docs
-<!--
+<!---
     - [ ] input
     - [ ] creation of a custom reader
         - [ ] Mention that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
@@ -137,7 +137,7 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
     - [ ] event handling
     - [ ] output
     - [ ] creation of a custom writer
--->
+--->
 - [ ] Insurance example
     - [ ] adapt to new library
     - [ ] add insured values
