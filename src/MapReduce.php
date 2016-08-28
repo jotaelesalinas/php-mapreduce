@@ -109,7 +109,7 @@ class MapReduce
             $func_key = function ($item) {
                 return reset($item);
             };
-        } elseif ($this->group_by instanceof Closure) {
+        } elseif (is_callable($this->group_by)) {
             $func_key = $this->group_by;
         } elseif (is_string($this->group_by) || is_numeric($this->group_by)) {
             $group_by = $this->group_by;
@@ -247,6 +247,9 @@ class MapReduce
             foreach ($this->outputs as $output) {
                 $output->send($item);
             }
+        }
+        foreach ($this->outputs as $output) {
+            $output->send(null);
         }
         
         $this->emit(self::EVENT_FINISHED_OUTPUT);

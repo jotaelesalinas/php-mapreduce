@@ -7,7 +7,7 @@ use JLSalinas\MapReduce\ReaderAdapter;
 use JLSalinas\RWGen\Readers\Csv;
 use JLSalinas\RWGen\Writers;
 
-class MapReduceNoGroupTest extends \PHPUnit_Framework_TestCase
+class MapReduceRunUngroupedTest extends \PHPUnit_Framework_TestCase
 {
     protected static $data1 = [
         [ 'first_name' => 'susanna', 'last_name' => 'connor',   'gender' => 'f', 'age' => '20'],

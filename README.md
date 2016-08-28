@@ -124,8 +124,7 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 
 ## To do
 
-- [ ] Tests, tests, tests
-    - [ ] MapReduce
+- [ ] Tests events in MapReduce
 - [ ] Add docs
     - [ ] input
     - [ ] creation of a custom reader
@@ -145,8 +144,7 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
     - [ ] (Enhancement) Multithread (requires pthreads)
         - [ ] (Enhancement) Pipelining: map while reading, reduce while mapping
 - [ ] Move this to-do list to [Issues](https://github.com/jotaelesalinas/php-local-mapreduce/issues)
-- [ ] Create milestones for: sequential, buffered, multithreaded, pipelined.
-- [x] Add to packagist
+- [ ] Create milestones in GitHub for: sequential (v1.0), buffered (v1.1), multithreaded (v1.2), pipelined (v1.3).
 
 ## Credits
 
