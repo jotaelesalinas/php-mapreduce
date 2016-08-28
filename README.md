@@ -126,6 +126,7 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 
 - [ ] Tests events in MapReduce
 - [ ] Add docs
+<!--
     - [ ] input
     - [ ] creation of a custom reader
         - [ ] Mention that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
@@ -136,6 +137,7 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
     - [ ] event handling
     - [ ] output
     - [ ] creation of a custom writer
+-->
 - [ ] Insurance example
     - [ ] adapt to new library
     - [ ] add insured values
@@ -143,6 +145,7 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 - [ ] (Enhancement) `withBuffer(int $max_size)` to allow mapping and reducing in batches
     - [ ] (Enhancement) Multithread (requires pthreads)
         - [ ] (Enhancement) Pipelining: map while reading, reduce while mapping
+- [ ] Mention that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
 - [ ] Move this to-do list to [Issues](https://github.com/jotaelesalinas/php-local-mapreduce/issues)
 - [ ] Create milestones in GitHub for: sequential (v1.0), buffered (v1.1), multithreaded (v1.2), pipelined (v1.3).
 
