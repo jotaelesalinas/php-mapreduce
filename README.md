@@ -126,6 +126,7 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 
 - [ ] Tests events in MapReduce
 - [ ] Add docs
+
 <!---
     - [ ] input
     - [ ] creation of a custom reader
@@ -138,6 +139,7 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
     - [ ] output
     - [ ] creation of a custom writer
 --->
+
 - [ ] Insurance example
     - [ ] adapt to new library
     - [ ] add insured values
