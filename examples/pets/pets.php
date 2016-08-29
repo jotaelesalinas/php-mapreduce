@@ -17,6 +17,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
  */
 use JLSalinas\MapReduce\MapReduce;
 use JLSalinas\MapReduce\ReaderAdapter;
+use JLSalinas\RWGen\Writers\Console;
 use League\Event\Emitter;
 use League\Event\Event;
 
@@ -69,8 +70,7 @@ $mapper = function ($pet) {
  * 
  * If R is the value returned by this function, this condition mst alway be true: reduce(R) === R
  */
-$reducer = function ($pets) {
-    return array_reduce($pets, function ($carry, $item) {
+$reducer = function ($carry, $item) {
         if ( is_null($carry) ) {
             $item['avg_age']            = $item['total_age'] / $item['num_animals'];
             $item['avg_visits']         = $item['total_visits'] / $item['num_animals'];
@@ -90,21 +90,7 @@ $reducer = function ($pets) {
         $avg_revenue_visit  = $total_revenue / $total_visits;
         
         return compact('species', 'num_animals', 'total_age', 'avg_age', 'total_visits', 'avg_visits', 'total_revenue', 'avg_revenue_animal', 'avg_revenue_visit');
-    });
 };
-
-/*
- * The output
- *
- * It has to be a Generator, or behave like one (just having a send() method).
- */
-class LogToConsole {
-	public function send ($data) {
-		if ( !is_null($data) ) {
-			print_r($data);
-		}
-	}
-}
 
 /*
  * The progess notifications
@@ -197,11 +183,15 @@ echo "===============================================================\n";
 $mapreducer = (new MapReduce($pets_cloud, $pets_csv))
                 // ->readFrom($pets_ancient) would fail because the structure is not the expected
                 ->readFrom($adapter_ancient) // that's why we use an adapter
-                ->setMapperReducer($mapper, $reducer)
-                ->writeTo(new LogToConsole())
+                ->map($mapper)
+                ->reduce($reducer)
+                ->writeTo(new Console(Console::JSON))
+                ->writeTo(new Console(Console::VARDUMP))
                 ->handleWith($emitter)
                 ->run();
 echo "\n";
+
+exit;
 
 echo "===============================================================\n";
 echo "REDUCE GROUPING BY FIRST COLUMN\n";

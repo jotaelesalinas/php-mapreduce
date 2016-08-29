@@ -18,7 +18,7 @@ class ConsoleMd5 extends Writer
             //var_dump($str);
             $str .= serialize($data);
         }
-        echo md5($str) . "\n";
+        echo md5($str) . PHP_EOL;
     }
 }
 
@@ -86,7 +86,7 @@ class MapReduceRunGroupedTest extends \PHPUnit_Framework_TestCase
     
     public function testAgesGroupByFirst()
     {
-        $this->expectOutputString('f4bbb6f6c5572bf306364dd02c581816' . "\n");
+        $this->expectOutputString('f4bbb6f6c5572bf306364dd02c581816' . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->map(self::map_eq())
                 ->reduce(self::reduce_age(), true)
@@ -96,7 +96,7 @@ class MapReduceRunGroupedTest extends \PHPUnit_Framework_TestCase
     
     public function testAgesGroupByString()
     {
-        $this->expectOutputString('952341af43b08c07bf4912c84e9c4781' . "\n");
+        $this->expectOutputString('952341af43b08c07bf4912c84e9c4781' . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->readFrom(new ReaderAdapter(self::$data2, function ($item) {
                     return isset($item['birthday']) ? [
@@ -113,7 +113,7 @@ class MapReduceRunGroupedTest extends \PHPUnit_Framework_TestCase
     
     public function testAgesGroupByFunc()
     {
-        $this->expectOutputString('564758e0f4370704cfa0995c18296593' . "\n");
+        $this->expectOutputString('564758e0f4370704cfa0995c18296593' . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->readFrom(new ReaderAdapter(self::$data2, function ($item) {
                     return isset($item['birthday']) ? [

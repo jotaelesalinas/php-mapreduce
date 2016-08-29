@@ -5,7 +5,7 @@ namespace JLSalinas\MapReduce\Tests;
 use JLSalinas\MapReduce\MapReduce;
 use JLSalinas\MapReduce\ReaderAdapter;
 use JLSalinas\RWGen\Readers\Csv;
-use JLSalinas\RWGen\Writers;
+use JLSalinas\RWGen\Writers\ConsoleJson;
 
 class MapReduceRunUngroupedTest extends \PHPUnit_Framework_TestCase
 {
@@ -65,16 +65,17 @@ class MapReduceRunUngroupedTest extends \PHPUnit_Framework_TestCase
     
     public function testAges()
     {
-        $this->expectOutputString('{"count":11,"total":330,"avg":30,"min":"20","max":"40"}' . "\n");
+        $this->expectOutputString('{"count":11,"total":330,"avg":30,"min":"20","max":"40"}' . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->map(self::map_eq())
                 ->reduce(self::reduce_age())
+                ->writeTo(new ConsoleJson())
                 ->run();
     }
     
     public function testAgesWithAdapter()
     {
-        $this->expectOutputString('{"count":16,"total":500,"avg":31.25,"min":"20","max":"40"}' . "\n");
+        $this->expectOutputString('{"count":16,"total":500,"avg":31.25,"min":"20","max":"40"}' . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->readFrom(new ReaderAdapter(self::$data2, function ($item) {
                     return isset($item['birthday']) ? [
@@ -83,6 +84,7 @@ class MapReduceRunUngroupedTest extends \PHPUnit_Framework_TestCase
                 }))
                 ->map(self::map_eq())
                 ->reduce(self::reduce_age())
+                ->writeTo(new ConsoleJson())
                 ->run();
     }
 }
