@@ -18,8 +18,7 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 use JLSalinas\MapReduce\MapReduce;
 use JLSalinas\MapReduce\ReaderAdapter;
 use JLSalinas\RWGen\Writers\Console;
-use League\Event\Emitter;
-use League\Event\Event;
+use JLSalinas\RWGen\Writers\ConsoleJson;
 
 /*
  * Datasources
@@ -93,49 +92,6 @@ $reducer = function ($carry, $item) {
 };
 
 /*
- * The progess notifications
- *
- * See http://github.com/thephpleague/event for details.
- */
-$emitter = new Emitter();
-$emitter->addListener(MapReduce::EVENT_START, function () {
-    echo "Start.\n";
-});
-$emitter->addListener(MapReduce::EVENT_FINISHED, function () {
-    echo "Finished.\n";
-});
-$emitter->addListener(MapReduce::EVENT_START_INPUT, function ($ev, $name) {
-    echo "-- Start input '$name'.\n";
-});
-$emitter->addListener(MapReduce::EVENT_FINISHED_INPUT, function ($ev, $name) {
-    echo "-- Finished input '$name'.\n";
-});
-$emitter->addListener(MapReduce::EVENT_START_MERGE, function ($ev) {
-    echo "-- Start merge.\n";
-});
-$emitter->addListener(MapReduce::EVENT_FINISHED_MERGE, function ($ev) {
-    echo "-- Finished merge.\n";
-});
-$emitter->addListener(MapReduce::EVENT_START_OUTPUT, function ($ev) {
-    echo "-- Start writing to output.\n";
-});
-$emitter->addListener(MapReduce::EVENT_FINISHED_OUTPUT, function ($ev) {
-    echo "-- Finished writing to output.\n";
-});
-/*
-$emitter->addListener(MapReduce::EVENT_MAPPED, function ($ev, $inputname, $original, $mapped) {
-    echo "---- Mapped item (input '$inputname').\n";
-    //echo "Original: "; var_dump($original);
-    //echo "Mapped: "; var_dump($mapped);
-});
-$emitter->addListener(MapReduce::EVENT_REDUCED, function ($ev, $inputname, $items, $redux) {
-    echo '---- ' . count($items) . " items reduced (input '$inputname').\n";
-    //echo "Items: "; var_dump($items);
-    //echo "Reduced: "; var_dump($redux);
-});
-*/
-
-/*
  * The incompatible datasource
  *
  * Now that we have our map and reduce functions tailored for the data we were provided with,
@@ -185,13 +141,10 @@ $mapreducer = (new MapReduce($pets_cloud, $pets_csv))
                 ->readFrom($adapter_ancient) // that's why we use an adapter
                 ->map($mapper)
                 ->reduce($reducer)
-                ->writeTo(new Console(Console::JSON))
-                ->writeTo(new Console(Console::VARDUMP))
-                ->handleWith($emitter)
+                ->writeTo(new ConsoleJson())
+                ->writeTo(new Console())
                 ->run();
 echo "\n";
-
-exit;
 
 echo "===============================================================\n";
 echo "REDUCE GROUPING BY FIRST COLUMN\n";
@@ -199,8 +152,9 @@ echo "===============================================================\n";
 $mapreducer = (new MapReduce($pets_cloud, $pets_csv))
                 // ->readFrom($pets_ancient) would fail because the structure is not the expected
                 ->readFrom($adapter_ancient) // that's why we use an adapter
-                ->setMapperReducer($mapper, $reducer, true)
-                ->writeTo(new LogToConsole())
-                ->handleWith($emitter)
+                ->map($mapper)
+                ->reduce($reducer, true)
+                ->writeTo(new ConsoleJson())
+                ->writeTo(new Console())
                 ->run();
 echo "\n";
