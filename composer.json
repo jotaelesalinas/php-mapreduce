@@ -1,20 +1,19 @@
 {
-    "name": "jotaelesalinas/php-local-mapreduce",
+    "name": "jotaelesalinas/php-mapreduce",
     "type": "library",
     "description": "A local implementation of the map/reduce strategy in PHP",
     "keywords": [
         "jotaelesalinas",
         "jlsalinas",
-        "php-local-mapreduce",
+        "php-mapreduce",
         "php",
         "mapreduce",
         "map-reduce",
         "map",
         "reduce",
-        "local",
         "non-distribted"
     ],
-    "homepage": "https://github.com/jotaelesalinas/php-local-mapreduce",
+    "homepage": "https://github.com/jotaelesalinas/php-mapreduce",
     "license": "MIT",
     "authors": [
         {
