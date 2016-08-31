@@ -1,4 +1,4 @@
-# php-local-mapreduce
+# php-mapreduce
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![Software License][ico-license]](LICENSE.md)
@@ -12,7 +12,7 @@ PSR-4 compliant library to easily do map-reduce locally, the old-fashioned utter
 Via Composer
 
 ``` bash
-$ composer require jotaelesalinas/php-local-mapreduce
+$ composer require jotaelesalinas/php-mapreduce
 ```
 
 ## Usage
@@ -148,7 +148,7 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
     - [ ] (Enhancement) Multithread (requires pthreads)
         - [ ] (Enhancement) Pipelining: map while reading, reduce while mapping
 - [ ] Mention that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
-- [ ] Move this to-do list to [Issues](https://github.com/jotaelesalinas/php-local-mapreduce/issues)
+- [ ] Move this to-do list to [Issues](https://github.com/jotaelesalinas/php-mapreduce/issues)
 - [ ] Create milestones in GitHub for: sequential (v1.0), buffered (v1.1), multithreaded (v1.2), pipelined (v1.3).
 
 ## Credits
@@ -160,17 +160,17 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
 
-[ico-version]: https://img.shields.io/packagist/v/jotaelesalinas/php-local-mapreduce.svg?style=flat-square
+[ico-version]: https://img.shields.io/packagist/v/jotaelesalinas/php-mapreduce.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
-[ico-travis]: https://img.shields.io/travis/jotaelesalinas/php-local-mapreduce/master.svg?style=flat-square
-[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/jotaelesalinas/php-local-mapreduce.svg?style=flat-square
-[ico-code-quality]: https://img.shields.io/scrutinizer/g/jotaelesalinas/php-local-mapreduce.svg?style=flat-square
-[ico-downloads]: https://img.shields.io/packagist/dt/jotaelesalinas/php-local-mapreduce.svg?style=flat-square
+[ico-travis]: https://img.shields.io/travis/jotaelesalinas/php-mapreduce/master.svg?style=flat-square
+[ico-scrutinizer]: https://img.shields.io/scrutinizer/coverage/g/jotaelesalinas/php-mapreduce.svg?style=flat-square
+[ico-code-quality]: https://img.shields.io/scrutinizer/g/jotaelesalinas/php-mapreduce.svg?style=flat-square
+[ico-downloads]: https://img.shields.io/packagist/dt/jotaelesalinas/php-mapreduce.svg?style=flat-square
 
-[link-packagist]: https://packagist.org/packages/jotaelesalinas/php-local-mapreduce
-[link-travis]: https://travis-ci.org/jotaelesalinas/php-local-mapreduce
-[link-scrutinizer]: https://scrutinizer-ci.com/g/jotaelesalinas/php-local-mapreduce/code-structure
-[link-code-quality]: https://scrutinizer-ci.com/g/jotaelesalinas/php-local-mapreduce
-[link-downloads]: https://packagist.org/packages/jotaelesalinas/php-local-mapreduce
+[link-packagist]: https://packagist.org/packages/jotaelesalinas/php-mapreduce
+[link-travis]: https://travis-ci.org/jotaelesalinas/php-mapreduce
+[link-scrutinizer]: https://scrutinizer-ci.com/g/jotaelesalinas/php-mapreduce/code-structure
+[link-code-quality]: https://scrutinizer-ci.com/g/jotaelesalinas/php-mapreduce
+[link-downloads]: https://packagist.org/packages/jotaelesalinas/php-mapreduce
 [link-author]: https://github.com/jotaelesalinas
 [link-contributors]: ../../contributors
