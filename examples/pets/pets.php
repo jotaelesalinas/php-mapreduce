@@ -62,12 +62,12 @@ $mapper = function ($pet) {
 /*
  * The reduce function
  * 
- * This function an array of already mapped items and returns one.
+ * This function accepts an array of already mapped items and returns one.
  *
  * It has to be possible to apply the reduce function on the value returned by this function
- * (possibly together with other mapped items or other values returned also by this function).
+ * (possibly together with other mapped items or other values also returned by this function).
  * 
- * If R is the value returned by this function, this condition mst alway be true: reduce(R) === R
+ * This condition must always be true: $reducer(null, $item) === $reducer(null, $reducer(null, $item))
  */
 $reducer = function ($carry, $item) {
         if ( is_null($carry) ) {
@@ -99,7 +99,7 @@ $reducer = function ($carry, $item) {
  * in the statistics.
  *
  * Note that in this new file some columns have different names (type for species, birth for birthday and amount
- * for revenue) while some columns have different format (birthday using English date notation MM/DD/YYYY instead
+ * for revenue) and some columns have different format (birthday using English date notation MM/DD/YYYY instead
  * of standard YYYY-MM-DD and revenue being a string with the dollar sign instead of just as a number.)
  */
 $pets_ancient = [
@@ -134,7 +134,7 @@ $adapter_ancient = new ReaderAdapter($pets_ancient, function ($item) {
 });
 
 echo "===============================================================\n";
-echo "CLASSIC REDUCE - THERE CAN BE ONLY ONE\n";
+echo "CLASSIC REDUCE - THERE CAN BE ONLY ONE!\n";
 echo "===============================================================\n";
 $mapreducer = (new MapReduce($pets_cloud, $pets_csv))
                 // ->readFrom($pets_ancient) would fail because the structure is not the expected
