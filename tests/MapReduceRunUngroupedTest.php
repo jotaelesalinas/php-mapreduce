@@ -81,8 +81,14 @@ class MapReduceRunUngroupedTest extends \PHPUnit_Framework_TestCase
         $expected_min = 20;
         $expected_max = 80; // xxx eventually this will not be true
         
-        $this->expectOutputString(sprintf('{"count":%d,"total":%d,"avg":%.04f,"min":%d,"max":%d}',
-            $expected_count, $expected_total, $expected_avg, $expected_min, $expected_max) . PHP_EOL);
+        $this->expectOutputString(sprintf(
+            '{"count":%d,"total":%d,"avg":%.04f,"min":%d,"max":%d}',
+            $expected_count,
+            $expected_total,
+            $expected_avg,
+            $expected_min,
+            $expected_max
+        ) . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->readFrom(new ReaderAdapter(self::$data2, function ($item) {
                     return isset($item['birthday']) ? [
