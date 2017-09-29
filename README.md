@@ -5,7 +5,7 @@
 [![Build Status][ico-travis]][link-travis]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-PSR-4 compliant library to easily do map-reduce locally, the old-fashioned utterly-unsexy non-distributed way.
+PHP PSR-4 compliant library to easily do non-distributed locla map-reduce.
 
 ## Install
 
