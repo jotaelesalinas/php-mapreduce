@@ -21,7 +21,7 @@ class MapReduceRunUngroupedTest extends \PHPUnit_Framework_TestCase
         [ 'first_name' => 'susana',  'last_name' => 'zommers',  'gender' => 'f', 'age' => '34'],
         [ 'first_name' => 'adrian',  'last_name' => 'deville',  'gender' => 'm', 'age' => '36'],
         [ 'first_name' => 'mike',    'last_name' => 'cole',     'gender' => 'm', 'age' => '38'],
-        [ 'first_name' => 'mike',    'last_name' => 'angus',    'gender' => 'm', 'age' => '40'],
+        [ 'first_name' => 'mike',    'last_name' => 'angus',    'gender' => 'm', 'age' => '80'],
     ];
     
     protected static $data2 = [
@@ -45,19 +45,19 @@ class MapReduceRunUngroupedTest extends \PHPUnit_Framework_TestCase
         return function ($carry, $item) {
             if (is_null($carry)) {
                 return [
-                    'count' => '1',
-                    'total' => $item['age'],
-                    'avg'   => $item['age'],
-                    'min'   => $item['age'],
-                    'max'   => $item['age'],
+                    'count' => 1,
+                    'total' => $item['age'] / 1,
+                    'avg'   => $item['age'] / 1,
+                    'min'   => $item['age'] / 1,
+                    'max'   => $item['age'] / 1,
                 ];
             }
             
             $count = $carry['count'] + 1;
-            $total = $carry['total'] + $item['age'];
-            $min = min($carry['min'], $item['age']);
-            $max = max($carry['max'], $item['age']);
-            $avg = $total / $count;
+            $total = $carry['total'] + ($item['age'] / 1);
+            $avg   = sprintf('%.4f', $total / $count) / 1;
+            $min   = min($carry['min'], $item['age'] / 1);
+            $max   = max($carry['max'], $item['age'] / 1);
             
             return compact('count', 'total', 'avg', 'min', 'max');
         };
@@ -65,7 +65,7 @@ class MapReduceRunUngroupedTest extends \PHPUnit_Framework_TestCase
     
     public function testAges()
     {
-        $this->expectOutputString('{"count":11,"total":330,"avg":30,"min":"20","max":"40"}' . PHP_EOL);
+        $this->expectOutputString('{"count":11,"total":370,"avg":33.6364,"min":20,"max":80}' . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->map(self::map_eq())
                 ->reduce(self::reduce_age())
@@ -75,7 +75,14 @@ class MapReduceRunUngroupedTest extends \PHPUnit_Framework_TestCase
     
     public function testAgesWithAdapter()
     {
-        $this->expectOutputString('{"count":16,"total":500,"avg":31.25,"min":"20","max":"40"}' . PHP_EOL);
+        $expected_count = 16;
+        $expected_total = 540 + 5 * (date('Y')/2016);
+        $expected_avg = $expected_total / $expected_count;
+        $expected_min = 20;
+        $expected_max = 80; // xxx eventually this will not be true
+        
+        $this->expectOutputString(sprintf('{"count":%d,"total":%d,"avg":%.04f,"min":%d,"max":%d}',
+            $expected_count, $expected_total, $expected_avg, $expected_min, $expected_max) . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->readFrom(new ReaderAdapter(self::$data2, function ($item) {
                     return isset($item['birthday']) ? [

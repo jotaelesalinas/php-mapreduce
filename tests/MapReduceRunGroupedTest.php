@@ -6,6 +6,7 @@ use JLSalinas\MapReduce\MapReduce;
 use JLSalinas\MapReduce\ReaderAdapter;
 use JLSalinas\RWGen\Readers\Csv;
 use JLSalinas\RWGen\Writers;
+use JLSalinas\RWGen\Writers\Console;
 use JLSalinas\RWGen\Writer;
 
 class ConsoleMd5 extends Writer
@@ -14,8 +15,6 @@ class ConsoleMd5 extends Writer
     {
         $str = '';
         while (($data = yield) !== null) {
-            //var_dump($data);
-            //var_dump($str);
             $str .= serialize($data);
         }
         echo md5($str) . PHP_EOL;
@@ -96,7 +95,7 @@ class MapReduceRunGroupedTest extends \PHPUnit_Framework_TestCase
     
     public function testAgesGroupByString()
     {
-        $this->expectOutputString('952341af43b08c07bf4912c84e9c4781' . PHP_EOL);
+        $this->expectOutputString('801f642580b9e082c406b628658c5e09' . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->readFrom(new ReaderAdapter(self::$data2, function ($item) {
                     return isset($item['birthday']) ? [
@@ -113,7 +112,7 @@ class MapReduceRunGroupedTest extends \PHPUnit_Framework_TestCase
     
     public function testAgesGroupByFunc()
     {
-        $this->expectOutputString('564758e0f4370704cfa0995c18296593' . PHP_EOL);
+        $this->expectOutputString('810c01c33d495d321f60cc6376f1fd87' . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->readFrom(new ReaderAdapter(self::$data2, function ($item) {
                     return isset($item['birthday']) ? [
