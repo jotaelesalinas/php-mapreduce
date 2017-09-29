@@ -24,7 +24,7 @@
         }
     ],
     "require": {
-        "php": ">=5.5",
+        "php": ">=7.0",
         "jotaelesalinas/php-rwgen": "*",
         "league/event": "^2.1"
     },
