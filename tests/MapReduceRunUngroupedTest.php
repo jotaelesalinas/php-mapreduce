@@ -46,26 +46,20 @@ class MapReduceRunUngroupedTest extends \PHPUnit_Framework_TestCase
             if (is_null($carry)) {
                 return [
                     'count' => 1,
-                    'total' => $item['age'] / 1,
-                    'avg'   => $item['age'] / 1,
-                    'min'   => $item['age'] / 1,
-                    'max'   => $item['age'] / 1,
+                    'sum' => $item['age'] / 1,
                 ];
             }
             
             $count = $carry['count'] + 1;
-            $total = $carry['total'] + ($item['age'] / 1);
-            $avg   = sprintf('%.4f', $total / $count) / 1;
-            $min   = min($carry['min'], $item['age'] / 1);
-            $max   = max($carry['max'], $item['age'] / 1);
+            $sum = $carry['sum'] + ($item['age'] / 1);
             
-            return compact('count', 'total', 'avg', 'min', 'max');
+            return compact('count', 'sum');
         };
     }
     
     public function testAges()
     {
-        $this->expectOutputString('{"count":11,"total":370,"avg":33.6364,"min":20,"max":80}' . PHP_EOL);
+        $this->expectOutputString('{"count":11,"sum":370}' . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->map(self::map_eq())
                 ->reduce(self::reduce_age())
@@ -77,18 +71,8 @@ class MapReduceRunUngroupedTest extends \PHPUnit_Framework_TestCase
     {
         $expected_count = 16;
         $expected_total = 540 + 5 * (date('Y')/2016);
-        $expected_avg = $expected_total / $expected_count;
-        $expected_min = 20;
-        $expected_max = 80; // xxx eventually this will not be true
         
-        $this->expectOutputString(sprintf(
-            '{"count":%d,"total":%d,"avg":%.04f,"min":%d,"max":%d}',
-            $expected_count,
-            $expected_total,
-            $expected_avg,
-            $expected_min,
-            $expected_max
-        ) . PHP_EOL);
+        $this->expectOutputString(sprintf('{"count":%d,"sum":%d}', $expected_count, $expected_total) . PHP_EOL);
         $mr1 = (new MapReduce(self::$data1))
                 ->readFrom(new ReaderAdapter(self::$data2, function ($item) {
                     return isset($item['birthday']) ? [
