@@ -8,14 +8,14 @@ use JLSalinas\RWGen\Readers\Csv;
 class ReaderAdapterTest extends \PHPUnit_Framework_TestCase
 {
     protected static $data = [1, 2, 3];
-    
+
     public function testAcceptsArrayOrTraversable()
     {
         $ra1 = new ReaderAdapter(self::$data, function ($item) {
             return $item;
         });
         $this->assertTrue(!!$ra1);
-        
+
         $f = tempnam('/tmp', 'tmp');
         $ra2 = new ReaderAdapter(new Csv($f), function ($item) {
             return $item;
@@ -23,7 +23,7 @@ class ReaderAdapterTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(!!$ra2);
         @unlink($f);
     }
-    
+
     /**
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage ReaderAdapter: $reader is not an array nor Traversable.
@@ -34,7 +34,7 @@ class ReaderAdapterTest extends \PHPUnit_Framework_TestCase
             return $item;
         });
     }
-    
+
     /**
      * @expectedException InvalidArgumentException
      * @expectedExceptionMessage Transform function must accept one parameter.
@@ -47,7 +47,7 @@ class ReaderAdapterTest extends \PHPUnit_Framework_TestCase
         });
         @unlink($f);
     }
-    
+
     /**
      * @expectedException Exception
      * @expectedExceptionMessage Input file does not exist: adsfasdf.csv
@@ -58,7 +58,7 @@ class ReaderAdapterTest extends \PHPUnit_Framework_TestCase
             return $item;
         });
     }
-    
+
     public function testEquality()
     {
         $ra = new ReaderAdapter(self::$data, function ($item) {
@@ -73,7 +73,7 @@ class ReaderAdapterTest extends \PHPUnit_Framework_TestCase
             $this->assertTrue($v === $ra2[$k]);
         }
     }
-    
+
     public function testDouble()
     {
         $ra = new ReaderAdapter(self::$data, function ($item) {
@@ -87,13 +87,5 @@ class ReaderAdapterTest extends \PHPUnit_Framework_TestCase
         foreach (self::$data as $k => $v) {
             $this->assertTrue($v === $ra2[$k] / 2);
         }
-    }
-    
-    /**
-     * @expectedException TypeError
-     */
-    public function testSecondArgumentNotCallable()
-    {
-        $ra = new ReaderAdapter(self::$data, 123);
     }
 }

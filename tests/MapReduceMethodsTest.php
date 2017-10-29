@@ -70,26 +70,6 @@ class MapReduceMethodsTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(!!$mr1);
     }
     
-    /**
-     * @expectedException TypeError
-     */
-    public function testMapFailsOnNonCallable()
-    {
-        $mr1 = new MapReduce();
-        $mr1->map(self::$data);
-        $this->assertTrue(!!$mr1);
-    }
-    
-    /**
-     * @expectedException TypeError
-     */
-    public function testMapFailsOnNoArgument()
-    {
-        $mr1 = new MapReduce();
-        $mr1->map();
-        $this->assertTrue(!!$mr1);
-    }
-    
     public function testReduceAcceptsCallableWithTwoParameters()
     {
         $mr1 = new MapReduce();
@@ -131,26 +111,6 @@ class MapReduceMethodsTest extends \PHPUnit_Framework_TestCase
         $mr1 = new MapReduce();
         $mr1->reduce(function () {
         });
-        $this->assertTrue(!!$mr1);
-    }
-    
-    /**
-     * @expectedException TypeError
-     */
-    public function testReduceFailsOnNonCallable()
-    {
-        $mr1 = new MapReduce();
-        $mr1->reduce(self::$data);
-        $this->assertTrue(!!$mr1);
-    }
-    
-    /**
-     * @expectedException TypeError
-     */
-    public function testReduceFailsOnNoArgument()
-    {
-        $mr1 = new MapReduce();
-        $mr1->reduce();
         $this->assertTrue(!!$mr1);
     }
     
