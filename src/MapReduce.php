@@ -41,10 +41,27 @@ class MapReduce
         $this->inputs[] = $input;
         return $this;
     }
-    
+
+    /**
+     * @param callable $arg
+     *
+     * @return \ReflectionFunctionAbstract
+     * @throws \ReflectionException
+     */
+    private function reflectCallable(callable $arg)
+    {
+        if (is_array($arg)) {
+            $ref = new \ReflectionMethod(...$arg);
+        } else {
+            $ref = new \ReflectionFunction($arg);
+        }
+
+        return $ref;
+    }
+
     public function map(callable $mapper)
     {
-        $fct = new \ReflectionFunction($mapper);
+        $fct = $this->reflectCallable($mapper);
         if ($fct->getNumberOfRequiredParameters() != 1) {
             throw new \InvalidArgumentException('Mapper function must accept one parameter.');
         }
@@ -59,7 +76,7 @@ class MapReduce
     //  - string || numeric: use the value as index for the mapped item
     public function reduce(callable $reducer, $group_by = null)
     {
-        $fct = new \ReflectionFunction($reducer);
+        $fct = $this->reflectCallable($reducer);
         if ($fct->getNumberOfRequiredParameters() != 2) {
             throw new \InvalidArgumentException('Reducer function must accept two parameters.');
         }
@@ -67,7 +84,7 @@ class MapReduce
         if (!is_null($group_by) && !is_bool($group_by) && !is_callable($group_by) && !is_numeric($group_by) && !is_string($group_by)) {
             throw new \InvalidArgumentException('Group_by must be bool, callable, numeric or string.');
         } elseif (is_callable($group_by)) {
-            $fct = new \ReflectionFunction($group_by);
+            $fct = $this->reflectCallable($group_by);
             if ($fct->getNumberOfRequiredParameters() != 1) {
                 throw new \InvalidArgumentException('Group_by, when callable, must accept one parameter.');
             }
