@@ -73,6 +73,8 @@ Array
 
 ### Groups
 
+Group by the value of a field (valid for arrays and objects):
+
 ```php
 $source = [
     [ "first_name" => "Susanna", "last_name" => "Connor",  "member" => "y", "age" => 20],
@@ -111,7 +113,7 @@ $result = MapReduce\MapReduce::create([
         "mapper" => $mapper, 
         "reducer" => $reduceAgeSum, 
     ])
-    // only odd numbers are passed to the mapper function
+    // group by field 'member'
     ->setGroupBy('member')
     ->run();
 
@@ -137,6 +139,8 @@ Array
 
 )
 ```
+
+Group by a custom value generated from each item:
 
 ```php
 $closestTen = fn($x) => floor($x['age'] / 10) * 10;
