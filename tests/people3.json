@@ -1,0 +1,8 @@
+[
+    { "first": "felix",  "last": "connor",  "gender": "f", "birthday": "1980-05-20"},
+    { "first": "esther", "last": "smith",   "gender": "m", "birthday": "1986-06-22"},
+    { "first": "mike",   "last": "mendoza", "gender": "m", "birthday": "1982-07-24"},
+    { "first": "jonas",  "last": "hammond", "gender": "m"},
+    { "first": "nancy",  "last": "duguin",  "gender": "f", "birthday": "1984-08-26"},
+    { "first": "bob",    "last": "svenson", "gender": "m", "birthday": "1978-09-28"}
+]

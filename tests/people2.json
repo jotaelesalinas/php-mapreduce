@@ -1,0 +1,7 @@
+[
+    null,
+    { "first_name": "mike",    "last_name": "reinolds",   "gender": "m", "age": 39},
+    { "first_name": "tony",    "last_name": "malloy",     "gender": "m", "age": 44},
+    { "first_name": "pam",     "last_name": "johnson",    "gender": "f", "age": 36},
+    { "first_name": "andy",    "last_name": "maccormack", "gender": "m", "age": 50}
+]

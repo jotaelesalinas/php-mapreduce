@@ -1,259 +1,177 @@
 <?php
-namespace JLSalinas\MapReduce;
-
-use League\Event\Emitter;
-use JLSalinas\RWGen\Writers\Console;
+namespace MapReduce;
 
 class MapReduce
 {
-    const EVENT_START           = 'start';
-    const EVENT_FINISHED        = 'end';
-    const EVENT_START_INPUT     = 'start.input';
-    const EVENT_FINISHED_INPUT  = 'end.input';
-    const EVENT_START_MERGE     = 'start.merge';
-    const EVENT_FINISHED_MERGE  = 'end.merge';
-    const EVENT_START_OUTPUT    = 'start.output';
-    const EVENT_FINISHED_OUTPUT = 'end.output';
-    const EVENT_MAPPED          = 'mapped';
-    const EVENT_REDUCED         = 'reduced';
+    private const NO_KEY = '__NO__KEY__';
+
+    protected $preFilter  = null;
+    protected $mapper     = null;
+    protected $postFilter = null;
+    protected $groupBy    = null;
+    protected $reducer    = null;
+    protected $input      = null;
+    protected $output     = [];
     
-    protected $inputs        = [];
-    protected $mapper        = null;
-    protected $reducer       = null;
-    protected $group_by      = null;
-    protected $outputs       = [];
-    protected $emitters      = [];
-    
-    public function __construct()
+    public static function create(?array $data = null)
     {
-        foreach (func_get_args() as $arg) {
-            $this->readFrom($arg);
-        }
-    }
-    
-    // $input is_array() || instanceOf Traversable
-    // PHP, why u not add traversable as you added callable ?!
-    public function readFrom($input)
-    {
-        if ((!is_array($input)) && (! ($input instanceof \Traversable))) {
-            throw new \InvalidArgumentException('Input is not an array nor Traversable.');
-        }
-        $this->inputs[] = $input;
-        return $this;
-    }
-    
-    public function map(callable $mapper)
-    {
-        $fct = new \ReflectionFunction($mapper);
-        if ($fct->getNumberOfRequiredParameters() != 1) {
-            throw new \InvalidArgumentException('Mapper function must accept one parameter.');
-        }
-        
-        $this->mapper = $mapper;
-        return $this;
-    }
-    
-    // $group_by can be:
-    //  - true: group by first element of mapped item
-    //  - Closure: group by the value returned by the closure after passing the mapped item
-    //  - string || numeric: use the value as index for the mapped item
-    public function reduce(callable $reducer, $group_by = null)
-    {
-        $fct = new \ReflectionFunction($reducer);
-        if ($fct->getNumberOfRequiredParameters() != 2) {
-            throw new \InvalidArgumentException('Reducer function must accept two parameters.');
-        }
-        
-        if (!is_null($group_by) && !is_bool($group_by) && !is_callable($group_by) && !is_numeric($group_by) && !is_string($group_by)) {
-            throw new \InvalidArgumentException('Group_by must be bool, callable, numeric or string.');
-        } elseif (is_callable($group_by)) {
-            $fct = new \ReflectionFunction($group_by);
-            if ($fct->getNumberOfRequiredParameters() != 1) {
-                throw new \InvalidArgumentException('Group_by, when callable, must accept one parameter.');
+        $mr = new self;
+
+        if ($data !== null) {
+            foreach ($data as $key => $value) {
+                switch ($key) {
+                    case "preFilter":
+                    case "mapper":
+                    case "postFilter":
+                    case "groupBy":
+                    case "reducer":
+                    case "input":
+                    case "inputMulti":
+                    case "output":
+                    case "outputMulti":
+                        $funcName = 'set' . ucfirst($key);
+                        $mr->$funcName($value);
+                        break;
+                    default:
+                        throw new \InvalidArgumentException("Wrong data field '$key'.");
+                }
             }
         }
+
+        return $mr;
+    }
+
+    public static function createAndRun(array $data)
+    {
+        return self::create($data)->run();
+    }
+
+    public function setInput(iterable ...$input): self
+    {
+        $this->input = $input;
+        return $this;
+    }
+    
+    public function setPreFilter(?callable $func): self
+    {
+        $this->preFilter = $func;
+        return $this;
+    }
+
+    public function setMapper(callable $func): self
+    {
+        $this->mapper = $func;
+        return $this;
+    }
+    
+    public function setPostFilter(?callable $func): self
+    {
+        $this->postFilter = $func;
+        return $this;
+    }
+
+    public function setGroupBy(int|string|callable|null $value): self
+    {
+        $func = $value;
         
-        $this->reducer = $reducer;
-        $this->group_by = $group_by;
+        if (is_numeric($value)) {
+            $func = function ($item) use ($value) {
+                return $item[$value];
+            };
+        } elseif (is_string($value)) {
+            $func = function ($item) use ($value) {
+                return is_array($item) ? $item[$value] : $item->$value;
+            };
+        } elseif ($value === null) {
+            $key = self::NO_KEY;
+            $func = function ($item) use ($key) {
+                return $key;
+            };
+        }
+        
+        $this->groupBy = $func;
+        return $this;
+    }
+
+    public function setReducer(callable $func): self
+    {
+        $this->reducer = $func;
         return $this;
     }
     
-    // $output Generator (has method `send()`)
-    public function writeTo($output)
+    public function setOutput(\Generator ...$output)
     {
-        if (!is_object($output) || !method_exists($output, 'send')) {
-            throw new \InvalidArgumentException('Output does not have a send() method.');
-        }
-        $this->outputs[] = $output;
+        $this->output = $output;
         return $this;
     }
     
-    public function handleWith(Emitter $emitter)
+    protected function mergeInputs()
     {
-        $this->emitters[] = $emitter;
-        return $this;
-    }
-    
-    protected function emit()
-    {
-        $args = null;
-        foreach ($this->emitters as $em) {
-            $args = $args ?: func_get_args();
-            call_user_func_array([$em, 'emit'], $args);
+        $numInput = 0;
+        foreach ($this->input as $input) {
+            $numInput += 1;
+            $numItems = 0;
+            foreach ($input as $item) {
+                $numItems += 1;
+                yield $item;
+            }
         }
     }
-    
-    protected function getKeyFunction()
+
+    private function checkProperties()
     {
-        if ($this->group_by === true) {
-            $func_key = function ($item) {
-                return reset($item);
-            };
-        } elseif (is_callable($this->group_by)) {
-            $func_key = $this->group_by;
-        } elseif (is_string($this->group_by) || is_numeric($this->group_by)) {
-            $group_by = $this->group_by;
-            $func_key = function ($item) use ($group_by) {
-                return $item[$group_by];
-            };
-        } else {
-            $func_key = function ($item) {
-                return '__no_key__';
-            };
+        if ($this->input === null || count($this->input) === 0) {
+            throw new \InvalidArgumentException("Missing input.");
+        } elseif ($this->mapper === null) {
+            throw new \InvalidArgumentException("Missing mapper function.");
+        } elseif ($this->reducer === null) {
+            throw new \InvalidArgumentException("Missing reducer function.");
         }
-        return $func_key;
     }
-    
-    /*
-    protected function processInput($input, $name)
+
+    public function run(): array
     {
-        // $this->maper($data) does not work :(
+        $this->checkProperties();
+
+        // $this->mapper($data) does not work :(
         // http://stackoverflow.com/questions/5605404/calling-anonymous-functions-defined-as-object-variables-in-php
-        $func_map = $this->mapper;
-        $func_reduce = $this->reducer;
-        $func_key = $this->getKeyFunction();
+        $funcPreFilter  = $this->preFilter;
+        $funcMapper     = $this->mapper;
+        $funcPostFilter = $this->postFilter;
+        $funcReducer    = $this->reducer;
+        $funcGroupBy    = $this->groupBy;
         
-        $reduced = array();
-        
-        $this->emit(self::EVENT_START_INPUT, $name);
-        
-        foreach ($input as $row) {
-            if ($row === null) {
+        $reduced = [];
+
+        foreach ($this->mergeInputs() as $item) {
+            if ($item === null) {
+                continue;
+            } elseif ($funcPreFilter !== null && !$funcPreFilter($item)) {
                 continue;
             }
-            
-            $mapped = $func_map($row);
-            $this->emit(self::EVENT_MAPPED, $name, $row, $mapped);
+
+            $mapped = $funcMapper($item);
+
             if ($mapped === null) {
                 continue;
+            } elseif ($funcPostFilter !== null && !$funcPostFilter($mapped)) {
+                continue;
             }
-            
-            $key = $func_key($mapped);
-            
-            if (!isset($reduced[$key])) {
-                $reduced[$key] = null;
-            }
-            
-            $reduced[$key] = $func_reduce($reduced[$key], $mapped);
-            $this->emit(self::EVENT_REDUCED, $name, $mapped, $reduced[$key]);
+
+            $key = $funcGroupBy === null ? self::NO_KEY : $funcGroupBy($mapped);
+            $reduced[$key] = $funcReducer($reduced[$key] ?? null, $mapped);
         }
         
-        $this->emit(self::EVENT_FINISHED_INPUT, $name);
-        
-        return $reduced;
-    }
-    
-    protected function mergeInputResults($input_results)
-    {
-        // $this->reducer($data) does not work :(
-        // http://stackoverflow.com/questions/5605404/calling-anonymous-functions-defined-as-object-variables-in-php
-        $func_reduce = $this->reducer;
-        
-        $this->emit(self::EVENT_START_MERGE);
-        
-        $reduced = array();
-        $already_reduced_keys = [];
-        
-        foreach ($input_results as $ir) {
-            foreach (array_keys($ir) as $k) {
-                if (isset($already_reduced_keys[$k])) {
-                    continue;
+        if (count($this->output) > 0) {
+            foreach ($this->output as $output) {
+                foreach ($reduced as $item) {
+                    $output->send($item);
                 }
-                $already_reduced_keys[$k] = 1;
-                $items = array_map(function ($item) use ($k) {
-                    return isset($item[$k]) ? $item[$k] : null;
-                }, $input_results);
-                $items = array_filter($items, function ($item) {
-                    return $item !== null;
-                });
-                
-                $reduced[$k] = $func_reduce($items);
-                $this->emit(self::EVENT_REDUCED, '__merge__', $items, $reduced[$k]);
+                $output->send(null);
             }
         }
-        
-        $this->emit(self::EVENT_FINISHED_MERGE, $reduced);
-        
-        return $reduced;
-    }
-    */
-    
-    public function run()
-    {
-        $this->emit(self::EVENT_START);
-        
-        // $this->maper($data) does not work :(
-        // http://stackoverflow.com/questions/5605404/calling-anonymous-functions-defined-as-object-variables-in-php
-        $func_map = $this->mapper;
-        $func_reduce = $this->reducer;
-        $func_key = $this->getKeyFunction();
-        
-        $reduced = array();
-        
-        foreach ($this->inputs as $name => $input) {
-            $this->emit(self::EVENT_START_INPUT, $name);
-            
-            foreach ($input as $row) {
-                if ($row === null) {
-                    continue;
-                }
-                
-                $mapped = $func_map($row);
-                $this->emit(self::EVENT_MAPPED, $name, $row, $mapped);
-                if ($mapped === null) {
-                    continue;
-                }
-                
-                $key = $func_key($mapped);
-                
-                if (!isset($reduced[$key])) {
-                    $reduced[$key] = null;
-                }
-                
-                $reduced[$key] = $func_reduce($reduced[$key], $mapped);
-                $this->emit(self::EVENT_REDUCED, $name, $mapped, $reduced[$key]);
-            }
-            
-            $this->emit(self::EVENT_FINISHED_INPUT, $name);
-        }
-        
-        $this->emit(self::EVENT_START_OUTPUT);
-        
-        if (count($this->outputs) == 0) {
-            $this->writeTo(new Console());
-        }
-        
-        foreach ($reduced as $item) {
-            foreach ($this->outputs as $output) {
-                $output->send($item);
-            }
-        }
-        foreach ($this->outputs as $output) {
-            $output->send(null);
-        }
-        
-        $this->emit(self::EVENT_FINISHED_OUTPUT);
-        
-        $this->emit(self::EVENT_FINISHED);
+
+        return count(array_keys($reduced)) === 1 && isset($reduced[self::NO_KEY]) ?
+            array_values($reduced) : $reduced;
     }
 }

@@ -5,7 +5,7 @@
 [![Build Status][ico-travis]][link-travis]
 [![Total Downloads][ico-downloads]][link-downloads]
 
-PHP PSR-4 compliant library to easily do non-distributed locla map-reduce.
+PHP PSR-4 compliant library to easily do non-distributed local map-reduce.
 
 ## Install
 
@@ -15,92 +15,182 @@ Via Composer
 $ composer require jotaelesalinas/php-mapreduce
 ```
 
-## Usage
+## Basic usage
 
-A very simple example were we have a CSV with the full order history of an hypothetical online shop
-and we want to know the average order value.
+```php
+require_once __DIR__ . '/vendor/autoload.php';
 
-``` php
-use JLSalinas\MapReduce\MapReduce;
-use JLSalinas\RWGen\Readers\Csv;
+$source = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+$mapper = fn($item) => $item * 2;
+$reducer = fn($carry, $item) => ($carry ?? 0) + $item;
 
-$mapper = function($order) {
-    return [
-        'orders'  => 1,
-        'revenue' => $order['total_amount']
-    ];
-};
+$result = MapReduce\MapReduce::create()
+    ->setInput($source)
+    ->setMapper($mapper)
+    ->setReducer($reducer)
+    ->run();
 
-$reducer = function ($carry, $item) {
-    if ( is_null($carry) ) {
-        $item['avg_order_value'] = $item['revenue'] / $item['orders'];
-        return $item;
-    }
-    
-    $orders          = $carry['orders'] + $item['orders'];
-    $revenue         = $carry['revenue'] + $item['revenue'];
-    $avg_order_value = $revenue / $orders;
-    
-    return compact('orders', 'revenue', 'avg_order_value');
-};
-
-$mapreducer = (new MapReduce(new Csv('/path/to/file.csv')))
-                ->map($mapper)
-                ->reduce($reducer)
-                ->run();
+print_r($result);
 ```
 
-Now an example where we also read from a CSV with the order history of an online shop,
-writing the output to another CSV, and we want to know _for each customer_:
-- date of the last order
-- number of orders since the beginning
-- amount spent since the beginning
-- average order value since the beginning
-- number of orders in the last 12 months
-- amount spent in the last 12 months
-- average order value in the last 12 months
+The output is:
 
+```
+Array
+(
+    [0] => 110
+)
+```
 
-``` php
-use JLSalinas\MapReduce\MapReduce;
-use JLSalinas\RWGen\Readers\Csv;
-use JLSalinas\RWGen\Writers\Csv;
+### Filters
 
-$mapper = function($order) {
-    return [
-        'customer_id'      => $order['customer_id'],
-        'date_last_order'  => $order['date'],
-        'orders'           => 1,
-        'orders_last_12m'  => strtotime($order['date']) > strtotime('-12 months') ? 1 : 0,
-        'revenue'          => $order['total_amount'],
-        'revenue_last_12m' => strtotime($order['date']) > strtotime('-12 months') ? $order['total_amount'] : 0
-    ];
-};
+```php
+$odd_numbers = fn($item) => $item % 2 === 0;
+$greater_than_10 = fn($item) => $item > 10;
 
-$reducer = function ($carry, $item) {
-    if ( is_null($carry) ) {
-        $item['avg_revenue'] = $item['revenue'] / $item['orders'];
-        $item['avg_revenue_last_12m'] = $item['orders_last_12m'] ? $item['revenue_last_12m'] / $item['orders_last_12m'] : 0;
-        return $item;
+$result = MapReduce\MapReduce::create([
+        "input" => $source, 
+        "mapper" => $mapper, 
+        "reducer" => $reducer, 
+    ])
+    // only odd numbers are passed to the mapper function
+    ->setPreFilter($odd_numbers)
+    // only numbers greater than 10 are passed to the reducer function
+    ->setPostFilter($greater_than_10)
+    ->run();
+
+print_r($result);
+```
+
+The output is:
+
+```
+Array
+(
+    [0] => 48
+)
+```
+
+### Groups
+
+```php
+$source = [
+    [ "first_name" => "Susanna", "last_name" => "Connor",  "member" => "y", "age" => 20],
+    [ "first_name" => "Adrian",  "last_name" => "Smith",   "member" => "n", "age" => 22],
+    [ "first_name" => "Mike",    "last_name" => "Mendoza", "member" => "n", "age" => 24],
+    [ "first_name" => "Linda",   "last_name" => "Duguin",  "member" => "y", "age" => 26],
+    [ "first_name" => "Bob",     "last_name" => "Svenson", "member" => "n", "age" => 28],
+    [ "first_name" => "Nancy",   "last_name" => "Potier",  "member" => "y", "age" => 30],
+    [ "first_name" => "Pete",    "last_name" => "Adams",   "member" => "n", "age" => 32],
+    [ "first_name" => "Susana",  "last_name" => "Zommers", "member" => "y", "age" => 34],
+    [ "first_name" => "Adrian",  "last_name" => "Deville", "member" => "n", "age" => 36],
+    [ "first_name" => "Mike",    "last_name" => "Cole",    "member" => "n", "age" => 38],
+    [ "first_name" => "Mike",    "last_name" => "Angus",   "member" => "n", "age" => 40],
+];
+
+// mapper does nothing
+$mapper = fn($x) => $x;
+
+// number of persons and sum of ages
+$reduceAgeSum = function ($carry, $item) {
+    if (is_null($carry)) {
+        return [
+            'count' => 1,
+            'age_sum' => $item['age'],
+        ];
     }
     
-    $date_last_order      = max($carry['date_last_order'], $item['date_last_order']);
-    $orders               = $carry['orders'] + $item['orders'];
-    $orders_last_12m      = $carry['orders_last_12m'] + $item['orders_last_12m'];
-    $revenue              = $carry['revenue'] + $item['revenue'];
-    $revenue_last_12m     = $carry['revenue_last_12m'] + $item['revenue_last_12m'];
-    $avg_revenue          = $revenue / $orders;
-    $avg_revenue_last_12m = $orders_last_12m > 0 ? $revenue_last_12m / $orders_last_12m : 0;
+    $count = $carry['count'] + 1;
+    $age_sum = $carry['age_sum'] + $item['age'];
     
-    return compact('date_last_order', 'orders', 'orders_last_12m', 'revenue', 'revenue_last_12m', 'avg_revenue', 'avg_revenue_last_12m');
+    return compact('count', 'age_sum');
 };
 
-$mapreducer = (new MapReduce(new Csv('/path/to/input_file.csv')))
-                ->map($mapper)
-                ->reduce($reducer, true)
-                ->writeTo(new Csv('/path/to/output_file.csv'))
-                ->run();
+$result = MapReduce\MapReduce::create([
+        "input" => $source, 
+        "mapper" => $mapper, 
+        "reducer" => $reduceAgeSum, 
+    ])
+    // only odd numbers are passed to the mapper function
+    ->setGroupBy('member')
+    ->run();
+
+print_r($result);
 ```
+
+The output is:
+
+```
+Array
+(
+    [y] => Array
+        (
+            [count] => 4
+            [age_sum] => 110
+        )
+
+    [n] => Array
+        (
+            [count] => 7
+            [age_sum] => 220
+        )
+
+)
+```
+
+### Input
+
+`MapReduce` accepts as input any data of type `iterable`. That means, arrays and traversables, e.g. generators.
+
+This is very handy when reading from files that do not fill in memory.
+
+```php
+$result = MapReduce\MapReduce::create([
+        "mapper" => $mapper, 
+        "reducer" => $reducer, 
+    ])
+    ->setInput(csvReadGenerator('myfile.csv'))
+    ->run();
+```
+
+Multiple inputs can be specified, passing several arguments to `setInput()`, as long as all of them are iterable:
+
+```php
+$result = MapReduce\MapReduce::create([
+        "mapper" => $mapper, 
+        "reducer" => $reducer, 
+    ])
+    ->setInput($arrayData, csvReadGenerator('myfile.csv'))
+    ->run();
+```
+
+### Output
+
+`MapReduce` can be configured to write the final data to one or more destinations.
+
+Each destination has to be a `Generator`:
+
+```php
+$result = MapReduce\MapReduce::create([
+        "mapper" => $mapper, 
+        "reducer" => $reducer, 
+    ])
+    ->setOutput(csvWriteGenerator('results.csv'))
+    ->run();
+```
+
+Multiple outputs can be specified as well:
+
+```php
+$result = MapReduce\MapReduce::create([
+        "mapper" => $mapper, 
+        "reducer" => $reducer, 
+    ])
+    ->setOutput(csvWriteGenerator('results.csv'), consoleGenerator())
+    ->run();
+```
+
+To help working with input and output generators, it is recommended to use the package [`jotaelesalinas/php-generators`](http://github.com/jotaelesalinas/php-generators), but it is not mandatory.
 
 You can see more elaborated examples under the folder [docs](docs).
 
@@ -124,32 +214,12 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 
 ## To do
 
-- [ ] Tests events in MapReduce
+- [ ] Add events to help see progress in large batches
 - [ ] Add docs
-
-<!---
-    - [ ] input
-    - [ ] creation of a custom reader
-        - [ ] Mention that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
-    - [ ] readeradapter
-    - [ ] map function
-    - [ ] reduce function
-    - [ ] grouping
-    - [ ] event handling
-    - [ ] output
-    - [ ] creation of a custom writer
---->
-
 - [ ] Insurance example
     - [ ] adapt to new library
     - [ ] add insured values
     - [ ] improve kml output (info, markers)
-- [ ] (Enhancement) `withBuffer(int $max_size)` to allow mapping and reducing in batches
-    - [ ] (Enhancement) Multithread (requires pthreads)
-        - [ ] (Enhancement) Pipelining: map while reading, reduce while mapping
-- [ ] Mention that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
-- [ ] Move this to-do list to [Issues](https://github.com/jotaelesalinas/php-mapreduce/issues)
-- [ ] Create milestones in GitHub for: sequential (v1.0), buffered (v1.1), multithreaded (v1.2), pipelined (v1.3).
 
 ## Credits
 

@@ -1,132 +1,58 @@
 <?php
 
-namespace JLSalinas\MapReduce\Tests;
+namespace MapReduce\Tests;
 
-use JLSalinas\MapReduce\MapReduce;
-use JLSalinas\MapReduce\ReaderAdapter;
-use JLSalinas\RWGen\Readers\Csv;
-use JLSalinas\RWGen\Writers;
-use JLSalinas\RWGen\Writers\Console;
-use JLSalinas\RWGen\Writer;
+use MapReduce\MapReduce;
 
-class ConsoleMd5 extends Writer
+class MapReduceRunGroupedTest extends MapReduceRunTestBase
 {
-    protected function outputGenerator()
+    public function testGroupByStringArray()
     {
-        $str = '';
-        while (($data = yield) !== null) {
-            $str .= serialize($data);
-        }
-        echo md5($str) . PHP_EOL;
+        $result = MapReduce::create()
+            ->setInput($this->data1)
+            ->setMapper($this->mapEq)
+            ->setReducer($this->reduceAgeSum)
+            ->setGroupBy('gender')
+            ->run();
+        $this->assertIsArray($result);
+        $this->assertEquals(count(array_keys($result)), 2);
+        $this->assertArrayHasKey('f', $result);
+        $this->assertArrayHasKey('m', $result);
+        $this->assertEquals($result['f'], ["count" => 4, "sum" => 110]);
+        $this->assertEquals($result['m'], ["count" => 7, "sum" => 220]);
     }
-}
+    
+    public function testGroupByStringObject()
+    {
+        $data1 = json_decode(json_encode($this->data1));
 
-class MapReduceRunGroupedTest extends \PHPUnit_Framework_TestCase
-{
-    protected static $data1 = [
-        [ 'first_name' => 'susanna', 'last_name' => 'connor',   'gender' => 'f', 'age' => '20'],
-        [ 'first_name' => 'adrian',  'last_name' => 'smith',    'gender' => 'm', 'age' => '22'],
-        [ 'first_name' => 'mike',    'last_name' => 'mendoza',  'gender' => 'm', 'age' => '24'],
-        [ 'first_name' => 'linda',   'last_name' => 'duguin',   'gender' => 'f', 'age' => '26'],
-        [ 'first_name' => 'bob',     'last_name' => 'svenson',  'gender' => 'm', 'age' => '28'],
-        [ 'first_name' => 'norma',   'last_name' => 'etherden', 'gender' => 'f', 'age' => '30'],
-        [ 'first_name' => 'nancy',   'last_name' => 'potier',   'gender' => 'f'],
-        [ 'first_name' => 'pete',    'last_name' => 'adams',    'gender' => 'm', 'age' => '32'],
-        [ 'first_name' => 'susana',  'last_name' => 'zommers',  'gender' => 'f', 'age' => '34'],
-        [ 'first_name' => 'adrian',  'last_name' => 'deville',  'gender' => 'm', 'age' => '36'],
-        [ 'first_name' => 'mike',    'last_name' => 'cole',     'gender' => 'm', 'age' => '38'],
-        [ 'first_name' => 'mike',    'last_name' => 'angus',    'gender' => 'm', 'age' => '40'],
-    ];
-    
-    protected static $data2 = [
-        [ 'first' => 'felix',  'last' => 'connor',  'gender' => 'f', 'birthday' => '1980-05-20'], // 36
-        [ 'first' => 'esther', 'last' => 'smith',   'gender' => 'm', 'birthday' => '1986-06-22'], // 30
-        [ 'first' => 'mike',   'last' => 'mendoza', 'gender' => 'm', 'birthday' => '1982-07-24'], // 34
-        [ 'first' => 'jonas',  'last' => 'hammond', 'gender' => 'm'],
-        [ 'first' => 'nancy',  'last' => 'duguin',  'gender' => 'f', 'birthday' => '1984-08-26'], // 32
-        [ 'first' => 'bob',    'last' => 'svenson', 'gender' => 'm', 'birthday' => '1978-09-28'], // 38
-    ];
-    
-    protected static function map_eq()
-    {
-        return function ($item) {
-            return isset($item['age']) ? $item : null;
-        };
+        $result = MapReduce::create()
+            ->setInput($data1)
+            ->setMapper($this->mapEq)
+            ->setReducer($this->reduceAgeSum)
+            ->setGroupBy('gender')
+            ->run();
+        $this->assertIsArray($result);
+        $this->assertEquals(count(array_keys($result)), 2);
+        $this->assertArrayHasKey('f', $result);
+        $this->assertArrayHasKey('m', $result);
+        $this->assertEquals($result['f'], ["count" => 4, "sum" => 110]);
+        $this->assertEquals($result['m'], ["count" => 7, "sum" => 220]);
     }
     
-    protected static function reduce_age()
+    public function testGroupByFunc()
     {
-        return function ($carry, $item) {
-            if (is_null($carry)) {
-                return [
-                    'first_name' => $item['first_name'],
-                    'last_name'  => $item['last_name'],
-                    'gender'     => $item['gender'],
-                    'count'      => 1,
-                    'total'      => $item['age'] / 1,
-                    'avg'        => $item['age'] / 1,
-                    'min'        => $item['age'] / 1,
-                    'max'        => $item['age'] / 1,
-                ];
-            }
-            
-            $first_name = $carry['first_name'];
-            $last_name  = $carry['last_name'];
-            $gender     = $carry['gender'];
-            $count      = $carry['count'] + 1;
-            $total      = $carry['total'] + $item['age'];
-            $min        = min($carry['min'], $item['age']);
-            $max        = max($carry['max'], $item['age']);
-            $avg        = $total / $count;
-            
-            return compact('first_name', 'last_name', 'gender', 'count', 'total', 'avg', 'min', 'max');
-        };
-    }
-    
-    public function testAgesGroupByFirst()
-    {
-        $this->expectOutputString('f4bbb6f6c5572bf306364dd02c581816' . PHP_EOL);
-        $mr1 = (new MapReduce(self::$data1))
-                ->map(self::map_eq())
-                ->reduce(self::reduce_age(), true)
-                ->writeTo(new ConsoleMd5())
-                ->run();
-    }
-    
-    public function testAgesGroupByString()
-    {
-        $this->expectOutputString('801f642580b9e082c406b628658c5e09' . PHP_EOL);
-        $mr1 = (new MapReduce(self::$data1))
-                ->readFrom(new ReaderAdapter(self::$data2, function ($item) {
-                    return isset($item['birthday']) ? [
-                        'first_name' => $item['first'],
-                        'gender'     => $item['gender'],
-                        'age'        => date('Y') - explode('-', $item['birthday'])[0],
-                    ] : null;
-                }))
-                ->map(self::map_eq())
-                ->reduce(self::reduce_age(), 'gender')
-                ->writeTo(new ConsoleMd5())
-                ->run();
-    }
-    
-    public function testAgesGroupByFunc()
-    {
-        $this->expectOutputString('810c01c33d495d321f60cc6376f1fd87' . PHP_EOL);
-        $mr1 = (new MapReduce(self::$data1))
-                ->readFrom(new ReaderAdapter(self::$data2, function ($item) {
-                    return isset($item['birthday']) ? [
-                        'first_name' => $item['first'],
-                        'last_name'  => $item['last'],
-                        'gender'     => $item['gender'],
-                        'age'        => date('Y') - explode('-', $item['birthday'])[0],
-                    ] : null;
-                }))
-                ->map(self::map_eq())
-                ->reduce(self::reduce_age(), function ($item) {
-                    return $item['first_name'] . ' ' . $item['last_name'];
-                })
-                ->writeTo(new ConsoleMd5())
-                ->run();
+        $funcAdapter = $this->adapterDob2Age;
+
+        $result = MapReduce::create()
+            ->setInput($this->data1, $this->data2)
+            ->setMapper($this->mapEq)
+            ->setReducer($this->reduceAgeSum)
+            ->setGroupBy(fn($x) => floor($x['age'] / 10) * 10)
+            ->run();
+        $this->assertIsArray($result);
+        $this->assertEquals(array_keys($result), [20, 30, 40, 50]);
+        $this->assertEquals($result[20], ["count" => 5, "sum" => 120]);
+        $this->assertEquals($result[50], ["count" => 1, "sum" => 50]);
     }
 }
