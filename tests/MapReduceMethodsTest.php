@@ -3,7 +3,6 @@ namespace MapReduce\Tests;
 
 use PHPUnit\Framework\TestCase;
 use MapReduce\MapReduce;
-use InvalidArgumentException;
 
 function accessProtected($obj, $prop)
 {
