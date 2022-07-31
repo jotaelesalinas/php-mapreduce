@@ -1,0 +1,13 @@
+[
+    { "first_name": "susanna", "last_name": "connor",  "gender": "f", "age": 20},
+    { "first_name": "adrian",  "last_name": "smith",   "gender": "m", "age": 22},
+    { "first_name": "mike",    "last_name": "mendoza", "gender": "m", "age": 24},
+    { "first_name": "linda",   "last_name": "duguin",  "gender": "f", "age": 26},
+    { "first_name": "bob",     "last_name": "svenson", "gender": "m", "age": 28},
+    { "first_name": "nancy",   "last_name": "potier",  "gender": "f", "age": 30},
+    { "first_name": "pete",    "last_name": "adams",   "gender": "m", "age": 32},
+    { "first_name": "susana",  "last_name": "zommers", "gender": "f", "age": 34},
+    { "first_name": "adrian",  "last_name": "deville", "gender": "m", "age": 36},
+    { "first_name": "mike",    "last_name": "cole",    "gender": "m", "age": 38},
+    { "first_name": "mike",    "last_name": "angus",   "gender": "m", "age": 40}
+]
