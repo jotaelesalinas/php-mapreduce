@@ -149,7 +149,7 @@ $result = MapReduce\MapReduce::create([
         "mapper" => $mapper, 
         "reducer" => $reducer, 
     ])
-    ->setInput(csvGenerator('myfile.csv'))
+    ->setInput(csvReadGenerator('myfile.csv'))
     ->run();
 ```
 
@@ -190,7 +190,7 @@ $result = MapReduce\MapReduce::create([
     ->run();
 ```
 
-To help working with input and output generators, it is recommended to use the package `jotaelesalinas/php-generators`, but it is not mandatory.
+To help working with input and output generators, it is recommended to use the package [`jotaelesalinas/php-generators`](http://github.com/jotaelesalinas/php-generators), but it is not mandatory.
 
 You can see more elaborated examples under the folder [docs](docs).
 
@@ -214,32 +214,12 @@ If you discover any security related issues, please DM me to [@jotaelesalinas](h
 
 ## To do
 
-- [ ] Tests events in MapReduce
+- [ ] Add events to help see progress in large batches
 - [ ] Add docs
-
-<!---
-    - [ ] input
-    - [ ] creation of a custom reader
-        - [ ] Mention that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
-    - [ ] readeradapter
-    - [ ] map function
-    - [ ] reduce function
-    - [ ] grouping
-    - [ ] event handling
-    - [ ] output
-    - [ ] creation of a custom writer
---->
-
 - [ ] Insurance example
     - [ ] adapt to new library
     - [ ] add insured values
     - [ ] improve kml output (info, markers)
-- [ ] (Enhancement) `withBuffer(int $max_size)` to allow mapping and reducing in batches
-    - [ ] (Enhancement) Multithread (requires pthreads)
-        - [ ] (Enhancement) Pipelining: map while reading, reduce while mapping
-- [ ] Mention that it is possible to work both with local and cloud data by implementing the right Reader/Writer, possibly using [Flysystem by Frank de Jonge](https://github.com/thephpleague/flysystem).
-- [ ] Move this to-do list to [Issues](https://github.com/jotaelesalinas/php-mapreduce/issues)
-- [ ] Create milestones in GitHub for: sequential (v1.0), buffered (v1.1), multithreaded (v1.2), pipelined (v1.3).
 
 ## Credits
 
