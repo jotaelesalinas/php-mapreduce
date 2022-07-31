@@ -30,12 +30,12 @@
     },
     "autoload": {
         "psr-4": {
-            "JLSalinas\\MapReduce\\": "src/"
+            "MapReduce\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "JLSalinas\\MapReduce\\Tests\\": "tests/"
+            "MapReduce\\Tests\\": "tests/"
         }
     },
     "scripts": {

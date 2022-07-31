@@ -1,7 +1,5 @@
 <?php
-namespace JLSalinas\MapReduce;
-
-use \Generator;
+namespace MapReduce;
 
 class MapReduce
 {
@@ -110,7 +108,7 @@ class MapReduce
         return $this;
     }
     
-    public function setOutput(Generator $output)
+    public function setOutput(\Generator $output)
     {
         $this->output = [$output];
         return $this;
@@ -119,8 +117,8 @@ class MapReduce
     public function setOutputMulti(iterable $output)
     {
         foreach ($output as $subOutput) {
-            if (! $subOutput instanceof Generator) {
-                throw new \InvalidArgumentException('Output is not an array of Generators.');
+            if (! $subOutput instanceof \Generator) {
+                throw new \InvalidArgumentException('Output is not an array of \Generators.');
             }
         }
         $this->output = $output;

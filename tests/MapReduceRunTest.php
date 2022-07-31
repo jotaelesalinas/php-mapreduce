@@ -1,8 +1,8 @@
 <?php
 
-namespace JLSalinas\MapReduce\Tests;
+namespace MapReduce\Tests;
 
-use JLSalinas\MapReduce\MapReduce;
+use MapReduce\MapReduce;
 
 $adapterDob2Age = function (iterable $original) {
     foreach ($original as $item) {

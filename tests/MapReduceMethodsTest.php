@@ -1,8 +1,8 @@
 <?php
-namespace JLSalinas\MapReduce\Tests;
+namespace MapReduce\Tests;
 
 use PHPUnit\Framework\TestCase;
-use JLSalinas\MapReduce\MapReduce;
+use MapReduce\MapReduce;
 use InvalidArgumentException;
 
 function accessProtected($obj, $prop)

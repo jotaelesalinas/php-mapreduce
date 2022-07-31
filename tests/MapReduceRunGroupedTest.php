@@ -1,8 +1,8 @@
 <?php
 
-namespace JLSalinas\MapReduce\Tests;
+namespace MapReduce\Tests;
 
-use JLSalinas\MapReduce\MapReduce;
+use MapReduce\MapReduce;
 
 class MapReduceRunGroupedTest extends MapReduceRunTestBase
 {

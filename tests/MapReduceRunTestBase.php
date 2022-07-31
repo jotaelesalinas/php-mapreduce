@@ -1,6 +1,6 @@
 <?php
 
-namespace JLSalinas\MapReduce\Tests;
+namespace MapReduce\Tests;
 
 use PHPUnit\Framework\TestCase;
 
