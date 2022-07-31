@@ -138,6 +138,47 @@ Array
 )
 ```
 
+```php
+$closestTen = fn($x) => floor($x['age'] / 10) * 10;
+
+$result = MapReduce\MapReduce::create([
+        "input" => $source, 
+        "mapper" => $mapper, 
+        "reducer" => $reduceAgeSum, 
+    ])
+    // group by age ranges of 10
+    ->setGroupBy($closestTen)
+    ->run();
+
+print_r($result);
+```
+
+The output is:
+
+```
+Array
+(
+    [20] => Array
+        (
+            [count] => 5
+            [age_sum] => 120
+        )
+
+    [30] => Array
+        (
+            [count] => 5
+            [age_sum] => 170
+        )
+
+    [40] => Array
+        (
+            [count] => 1
+            [age_sum] => 40
+        )
+
+)
+```
+
 ### Input
 
 `MapReduce` accepts as input any data of type `iterable`. That means, arrays and traversables, e.g. generators.
