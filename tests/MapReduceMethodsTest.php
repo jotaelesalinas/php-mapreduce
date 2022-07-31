@@ -29,32 +29,13 @@ class MapReduceMethodsTest extends TestCase
         $this->assertEquals($input[0], $arr1);
 
         $mr = new MapReduce();
-        $mr->setInputMulti([$arr1, $arr2]);
+        $mr->setInput($arr1, $arr2);
         $input = accessProtected($mr, 'input');
         $this->assertNotNull($input);
         $this->assertIsArray($input);
         $this->assertTrue(count($input) === 2);
         $this->assertEquals($input[0], $arr1);
         $this->assertEquals($input[1], $arr2);
-    }
-    
-    public function testInputFailsNotIterable()
-    {
-        $arr1 = [1,2,3,4,5];
-
-        $mr = new MapReduce();
-        $this->expectException(InvalidArgumentException::class);
-        $mr->setInputMulti($arr1);
-    }
-    
-    public function testInputMultiFailsNotIterable()
-    {
-        $arr1 = [1,2,3,4,5];
-        $noArr = 6;
-
-        $mr = new MapReduce();
-        $this->expectException(InvalidArgumentException::class);
-        $mr->setInputMulti([$arr1, $noArr]);
     }
     
     public function testGroupByToFunction()

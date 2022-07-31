@@ -29,7 +29,8 @@ class MapReduce
                     case "inputMulti":
                     case "output":
                     case "outputMulti":
-                        $mr->$key($value);
+                        $funcName = 'set' . ucfirst($key);
+                        $mr->$funcName($value);
                         break;
                     default:
                         throw new \InvalidArgumentException("Wrong data field '$key'.");
@@ -45,19 +46,8 @@ class MapReduce
         return self::create($data)->run();
     }
 
-    public function setInput(iterable $input): self
+    public function setInput(iterable ...$input): self
     {
-        $this->input = [$input];
-        return $this;
-    }
-    
-    public function setInputMulti(iterable $input): self
-    {
-        foreach ($input as $subInput) {
-            if (!is_iterable($subInput)) {
-                throw new \InvalidArgumentException('Input is not an iterable of iterables.');
-            }
-        }
         $this->input = $input;
         return $this;
     }
@@ -93,8 +83,9 @@ class MapReduce
                 return is_array($item) ? $item[$value] : $item->$value;
             };
         } elseif ($value === null) {
-            $func = function ($item) {
-                return MapReduce::NO_KEY;
+            $key = self::NO_KEY;
+            $func = function ($item) use ($key) {
+                return $key;
             };
         }
         
@@ -108,19 +99,8 @@ class MapReduce
         return $this;
     }
     
-    public function setOutput(\Generator $output)
+    public function setOutput(\Generator ...$output)
     {
-        $this->output = [$output];
-        return $this;
-    }
-    
-    public function setOutputMulti(iterable $output)
-    {
-        foreach ($output as $subOutput) {
-            if (! $subOutput instanceof \Generator) {
-                throw new \InvalidArgumentException('Output is not an array of \Generators.');
-            }
-        }
         $this->output = $output;
         return $this;
     }
@@ -178,7 +158,7 @@ class MapReduce
                 continue;
             }
 
-            $key = $funcGroupBy === null ? MapReduce::NO_KEY : $funcGroupBy($mapped);
+            $key = $funcGroupBy === null ? self::NO_KEY : $funcGroupBy($mapped);
             $reduced[$key] = $funcReducer($reduced[$key] ?? null, $mapped);
         }
         
@@ -191,7 +171,7 @@ class MapReduce
             }
         }
 
-        return count(array_keys($reduced)) === 1 && isset($reduced[MapReduce::NO_KEY]) ?
+        return count(array_keys($reduced)) === 1 && isset($reduced[self::NO_KEY]) ?
             array_values($reduced) : $reduced;
     }
 }

@@ -45,7 +45,7 @@ class MapReduceRunGroupedTest extends MapReduceRunTestBase
         $funcAdapter = $this->adapterDob2Age;
 
         $result = MapReduce::create()
-            ->setInputMulti([$this->data1, $this->data2])
+            ->setInput($this->data1, $this->data2)
             ->setMapper($this->mapEq)
             ->setReducer($this->reduceAgeSum)
             ->setGroupBy(fn($x) => floor($x['age'] / 10) * 10)

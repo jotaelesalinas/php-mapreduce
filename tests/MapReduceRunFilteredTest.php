@@ -10,7 +10,7 @@ class MapReduceRunFilteredTest extends MapReduceRunTestBase
     {
         $funcAdapter = $this->adapterDob2Age;
         $result = MapReduce::create()
-            ->setInputMulti([$this->data1, $this->data2])
+            ->setInput($this->data1, $this->data2)
             ->setPreFilter(fn($x) => $x['gender'] === 'f')
             ->setMapper($this->mapEq)
             ->setReducer($this->reduceAgeSum)
@@ -23,7 +23,7 @@ class MapReduceRunFilteredTest extends MapReduceRunTestBase
     {
         $funcAdapter = $this->adapterDob2Age;
         $result = MapReduce::create()
-            ->setInputMulti([$this->data1, $this->data2])
+            ->setInput($this->data1, $this->data2)
             ->setMapper($this->mapEq)
             ->setPostFilter(fn($x) => $x['age'] >= 40)
             ->setReducer($this->reduceAgeSum)

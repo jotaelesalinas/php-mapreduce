@@ -44,7 +44,7 @@ class MapReduceRunTest extends MapReduceRunTestBase
     {
         global $adapterDob2Age;
         $result = MapReduce::create()
-            ->setInputMulti([$this->data1, $this->data2, $adapterDob2Age($this->data3)])
+            ->setInput($this->data1, $this->data2, $adapterDob2Age($this->data3))
             ->setMapper($this->mapEq)
             ->setReducer($this->reduceAgeSum)
             ->run();
