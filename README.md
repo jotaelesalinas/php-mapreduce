@@ -187,7 +187,7 @@ Array
 
 `MapReduce` accepts as input any data of type `iterable`. That means, arrays and traversables, e.g. generators.
 
-This is very handy when reading from files that do not fill in memory.
+This is very handy when reading from big files that do not fit in memory.
 
 ```php
 $result = MapReduce\MapReduce::create([
@@ -237,7 +237,7 @@ $result = MapReduce\MapReduce::create([
 
 To help working with input and output generators, it is recommended to use the package [`jotaelesalinas/php-generators`](http://github.com/jotaelesalinas/php-generators), but it is not mandatory.
 
-You can see more elaborated examples under the folder [docs](docs).
+You can see more elaborated examples under the folder [examples](examples).
 
 ## Change log
 
