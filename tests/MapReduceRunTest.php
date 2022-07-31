@@ -4,6 +4,17 @@ namespace JLSalinas\MapReduce\Tests;
 
 use JLSalinas\MapReduce\MapReduce;
 
+$adapterDob2Age = function (iterable $original) {
+    foreach ($original as $item) {
+        // let´s say we are in the year 2020
+        $age = isset($item['birthday']) ? 2020 - explode('-', $item['birthday'])[0] : null;
+        if ($age !== null) {
+            $item['age'] = $age;
+        }
+        yield $item;
+    }
+};
+
 class MapReduceRunTest extends MapReduceRunTestBase
 {
     public function testAges()
@@ -11,7 +22,7 @@ class MapReduceRunTest extends MapReduceRunTestBase
         $result = MapReduce::create()
             ->setInput($this->data1)
             ->setMapper($this->mapEq)
-            ->setReducer($this->reduceAge)
+            ->setReducer($this->reduceAgeSum)
             ->run();
         $this->assertIsArray($result);
         $this->assertEquals($result, [["count" => 11, "sum" => 330]]);
@@ -19,11 +30,11 @@ class MapReduceRunTest extends MapReduceRunTestBase
     
     public function testAgesWithAdapter()
     {
-        $funcAdapter = $this->adapterDob2Age;
+        global $adapterDob2Age;
         $result = MapReduce::create()
-            ->setInput($funcAdapter($this->data3))
+            ->setInput($adapterDob2Age($this->data3))
             ->setMapper($this->mapEq)
-            ->setReducer($this->reduceAge)
+            ->setReducer($this->reduceAgeSum)
             ->run();
         $this->assertIsArray($result);
         $this->assertEquals($result, [["count" => 5, "sum" => 190]]);
@@ -31,11 +42,11 @@ class MapReduceRunTest extends MapReduceRunTestBase
 
     public function testAgesMulti()
     {
-        $funcAdapter = $this->adapterDob2Age;
+        global $adapterDob2Age;
         $result = MapReduce::create()
-            ->setInputMulti([$this->data1, $this->data2, $funcAdapter($this->data3)])
+            ->setInputMulti([$this->data1, $this->data2, $adapterDob2Age($this->data3)])
             ->setMapper($this->mapEq)
-            ->setReducer($this->reduceAge)
+            ->setReducer($this->reduceAgeSum)
             ->run();
         $this->assertIsArray($result);
         $this->assertEquals($result, [["count" => 20, "sum" => 689]]);

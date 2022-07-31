@@ -11,7 +11,7 @@ class MapReduceRunGroupedTest extends MapReduceRunTestBase
         $result = MapReduce::create()
             ->setInput($this->data1)
             ->setMapper($this->mapEq)
-            ->setReducer($this->reduceAge)
+            ->setReducer($this->reduceAgeSum)
             ->setGroupBy('gender')
             ->run();
         $this->assertIsArray($result);
@@ -29,7 +29,7 @@ class MapReduceRunGroupedTest extends MapReduceRunTestBase
         $result = MapReduce::create()
             ->setInput($data1)
             ->setMapper($this->mapEq)
-            ->setReducer($this->reduceAge)
+            ->setReducer($this->reduceAgeSum)
             ->setGroupBy('gender')
             ->run();
         $this->assertIsArray($result);
@@ -45,9 +45,9 @@ class MapReduceRunGroupedTest extends MapReduceRunTestBase
         $funcAdapter = $this->adapterDob2Age;
 
         $result = MapReduce::create()
-            ->setInputMulti([$this->data1, $this->data2, $funcAdapter($this->data3)])
+            ->setInputMulti([$this->data1, $this->data2])
             ->setMapper($this->mapEq)
-            ->setReducer($this->reduceAge)
+            ->setReducer($this->reduceAgeSum)
             ->setGroupBy(fn($x) => floor($x['age'] / 10) * 10)
             ->run();
         $this->assertIsArray($result);

@@ -13,7 +13,7 @@ class MapReduceRunTestBase extends TestCase
     protected $adapterDob2Age;
 
     protected $mapEq;
-    protected $reduceAge;
+    protected $reduceAgeSum;
 
     protected function setUp(): void
     {
@@ -25,21 +25,6 @@ class MapReduceRunTestBase extends TestCase
         // 5, 190
         // total: 20, 689
 
-        $this->adapterDob2Age = function (iterable $original) {
-            foreach ($original as $item) {
-                // let´s say we are in the year 2020
-                $age = isset($item['birthday']) ? 2020 - explode('-', $item['birthday'])[0] : null;
-                if ($age !== null) {
-                    if (is_object($item)) {
-                        $item->age = $age;
-                    } else {
-                        $item['age'] = $age;
-                    }
-                }
-                yield $item;
-            }
-        };
-
         $this->mapEq = function ($item) {
             if (is_object($item)) {
                 return isset($item->age) ? $item : null;
@@ -47,7 +32,7 @@ class MapReduceRunTestBase extends TestCase
             return isset($item['age']) ? $item : null;
         };
 
-        $this->reduceAge = function ($carry, $item) {
+        $this->reduceAgeSum = function ($carry, $item) {
             $age = is_object($item) ? $item->age : $item['age'];
             if (is_null($carry)) {
                 return [

@@ -10,25 +10,25 @@ class MapReduceRunFilteredTest extends MapReduceRunTestBase
     {
         $funcAdapter = $this->adapterDob2Age;
         $result = MapReduce::create()
-            ->setInputMulti([$this->data1, $this->data2, $funcAdapter($this->data3)])
+            ->setInputMulti([$this->data1, $this->data2])
             ->setPreFilter(fn($x) => $x['gender'] === 'f')
             ->setMapper($this->mapEq)
-            ->setReducer($this->reduceAge)
+            ->setReducer($this->reduceAgeSum)
             ->run();
         $this->assertIsArray($result);
-        $this->assertEquals($result, [["count" => 7, "sum" => 222]]);
+        $this->assertEquals($result, [["count" => 5, "sum" => 146]]);
     }
     
     public function testPreFilterByAge()
     {
         $funcAdapter = $this->adapterDob2Age;
         $result = MapReduce::create()
-            ->setInputMulti([$this->data1, $this->data2, $funcAdapter($this->data3)])
+            ->setInputMulti([$this->data1, $this->data2])
             ->setMapper($this->mapEq)
-            ->setPostFilter(fn($x) => $x['age'] > 40)
-            ->setReducer($this->reduceAge)
+            ->setPostFilter(fn($x) => $x['age'] >= 40)
+            ->setReducer($this->reduceAgeSum)
             ->run();
         $this->assertIsArray($result);
-        $this->assertEquals($result, [["count" => 3, "sum" => 136]]);
+        $this->assertEquals($result, [["count" => 3, "sum" => 134]]);
     }
 }
