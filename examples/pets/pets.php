@@ -15,8 +15,8 @@ require_once __DIR__ . '/../../vendor/autoload.php';
 /*
  * Dependencies
  */
-use JLSalinas\MapReduce\MapReduce;
-use JLSalinas\MapReduce\ReaderAdapter;
+use MapReduce\MapReduce;
+use MapReduce\ReaderAdapter;
 use JLSalinas\RWGen\Writers\Console;
 use JLSalinas\RWGen\Writers\ConsoleJson;
 
@@ -116,7 +116,7 @@ $pets_ancient = [
  * Instead of modifying the data in the origin (it may not be possible if we talk about remote datasources instead of
  * a local CSV file), what we do is "adapting" the data to the structure we expect.
  *
- * To do so, we create a new JLSalinas\MapReduce\ReaderAdapter object with two arguments: the datasource and a
+ * To do so, we create a new MapReduce\ReaderAdapter object with two arguments: the datasource and a
  * transformation function. Think of it as pre-mapping the data.
  */
 $adapter_ancient = new ReaderAdapter($pets_ancient, function ($item) {

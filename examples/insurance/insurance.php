@@ -20,7 +20,7 @@ use JLSalinas\RWGen\Writers\Csv as CsvWriter;
 use JLSalinas\RWGen\Writers\Kml;
 use JLSalinas\RWGen\Writers\Console;
 use JLSalinas\RWGen\Writers\ConsoleJson;
-use JLSalinas\MapReduce\MapReduce;
+use MapReduce\MapReduce;
 use League\Event\Emitter;
 use League\Event\Event;
 
