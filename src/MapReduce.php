@@ -21,6 +21,8 @@ class MapReduce
     protected $groupBy = null;
     /** @var callable(mixed, mixed): mixed|null */
     protected $reducer = null;
+    /** @var callable(int, mixed, mixed): void|null */
+    protected $progress = null;
     /** @var array<array-key, iterable<mixed>>|null */
     protected ?array $input = null;
     /** @var array<array-key, Generator<mixed, mixed, mixed, mixed>|Writer> */
@@ -159,6 +161,24 @@ class MapReduce
         return $this;
     }
 
+    /**
+     * @param callable(int, mixed, mixed): void|null $func
+     */
+    public function setProgress(?callable $func): self
+    {
+        $this->progress = $func;
+
+        return $this;
+    }
+
+    /**
+     * @param callable(int, mixed, mixed): void|null $func
+     */
+    public function progreso(?callable $func): self
+    {
+        return $this->setProgress($func);
+    }
+
     public function reduce(callable $func): self
     {
         return $this->setReducer($func);
@@ -226,8 +246,11 @@ class MapReduce
         $funcReducer = $this->reducer;
         /** @var callable(mixed): mixed|null $funcGroupBy */
         $funcGroupBy = $this->groupBy;
+        /** @var callable(int, mixed, mixed): void|null $funcProgress */
+        $funcProgress = $this->progress;
 
         $reduced = [];
+        $countProcessed = 0;
 
         foreach ($this->mergeInputs() as $item) {
             if ($item === null) {
@@ -250,6 +273,11 @@ class MapReduce
 
             $key = $funcGroupBy === null ? self::NO_KEY : $funcGroupBy($mapped);
             $reduced[$key] = $funcReducer($reduced[$key] ?? null, $mapped);
+            $countProcessed++;
+
+            if ($funcProgress !== null) {
+                $funcProgress($countProcessed, $item, $mapped);
+            }
         }
 
         if (count($this->output) > 0) {
