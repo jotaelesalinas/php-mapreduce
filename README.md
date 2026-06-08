@@ -6,20 +6,17 @@
 
 Simple in-memory map/reduce for PHP iterables.
 
-This repository is the relaunch of the old `php-mapreduce` package under a new
-name and namespace. The current codebase still contains the historical API in a
-compatibility phase, but the target direction is the simpler `MapReduce`
-engine described in the planning docs at the repository root.
+This library is for local data processing when you want a small, readable API
+and do not need distributed workers, external storage, or tuning knobs. It is
+the lighter counterpart to heavier MapReduce-style systems.
 
-## Status
+## Why this exists
 
-- Package name: `jotaelesalinas/php-simple-mapreduce`
-- Namespace: `JLSalinas\SimpleMapReduce`
-- PHP floor: `8.1`
-- Test runner: Pest
-- Static analysis: PHPStan
-- Style: PHP-CS-Fixer
-- CI: GitHub Actions
+- Works with any `iterable`, including arrays, generators, and custom
+  iterators.
+- Keeps all work inside one PHP process.
+- Exposes a small fluent API that is easy to test.
+- Lets you observe progress without coupling to a logger.
 
 ## Install
 
@@ -27,10 +24,7 @@ engine described in the planning docs at the repository root.
 composer require jotaelesalinas/php-simple-mapreduce
 ```
 
-## Current API
-
-The current class is still the historical `MapReduce` engine, now under the new
-namespace:
+## Quickstart
 
 ```php
 <?php
@@ -44,25 +38,42 @@ $result = MapReduce::create()
     ->setMapper(static fn (mixed $item): mixed => $item * 2)
     ->setReducer(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
     ->run();
+
+var_dump($result);
 ```
 
-## What changed in this relaunch
+## Semantics
 
-- New package name and namespace.
-- PHP 8.1 minimum.
-- Pest-based tests.
-- PHPStan and PHP-CS-Fixer.
-- GitHub Actions instead of Travis.
+- `setInput()` accepts one or more `iterable` sources.
+- `setMapper()` transforms each input item before reduction.
+- `setReducer()` receives the previous carry value and the mapped item.
+- `setGroupBy()` can group by array key, object property, or callback.
+- `setProgress()` receives the processed count, original item, and mapped item.
+- `setOutput()` can write reduced results to one or more `Writer` instances.
 
-## Next steps
+## Fluent API
 
-The remaining work is to finish aligning the implementation and documentation
-with the final plan:
+```php
+$result = MapReduce::create()
+    ->setInput($items)
+    ->setMapper($mapper)
+    ->setReducer($reducer)
+    ->setProgress($progressCallback)
+    ->setOutput($writer)
+    ->run();
+```
 
-- clarify the map/reduce semantics,
-- modernize the README into a landing page,
-- add examples that match the new API,
-- keep the bridge/compatibility story documented.
+## When to use this
+
+- Use this library when you need a local, readable aggregation pipeline.
+- Use a distributed engine when you need parallel workers or external storage.
+- Use `php-data-streams` when you need specialized streaming readers and writers
+  for formats such as CSV, JSON, XML, or xlsx.
+
+## Examples
+
+- [`examples/pets/pets.php`](examples/pets/pets.php)
+- [`examples/insurance/README.md`](examples/insurance/README.md)
 
 ## Development
 
@@ -72,6 +83,12 @@ composer test
 composer analyse
 composer format
 ```
+
+## Project status
+
+This repository is being modernized in place. The namespace, package name, and
+tooling have been updated; the remaining work is to keep refining the API and
+examples until the final plan is fully implemented.
 
 [ico-version]: https://img.shields.io/packagist/v/jotaelesalinas/php-simple-mapreduce.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
