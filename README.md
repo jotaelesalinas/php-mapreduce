@@ -12,8 +12,7 @@ the lighter counterpart to heavier MapReduce-style systems.
 
 ## Why this exists
 
-- Works with any `iterable`, including arrays, generators, and custom
-  iterators.
+- Works with any `iterable`, including arrays, generators, and custom iterators.
 - Keeps all work inside one PHP process.
 - Exposes a small fluent API that is easy to test.
 - Lets you observe progress without coupling to a logger.

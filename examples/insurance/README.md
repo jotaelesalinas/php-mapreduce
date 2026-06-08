@@ -1,9 +1,19 @@
 # Insurance example
 
-Historical example retained from the old project.
+This example shows a local aggregation workflow over insurance-like data.
 
-It demonstrates the original map/reduce workflow over CSV input and multiple
-outputs. It still needs to be updated to the relaunch API and the new stream
-packages planned for this repository.
+It is intentionally self-contained so it can be run without any optional stream
+packages.
 
-For now, treat it as reference material rather than a supported example.
+## What it demonstrates
+
+- mapping raw rows into a reduced shape,
+- grouping by a derived key,
+- calculating grouped statistics,
+- writing the result through a custom `Writer`.
+
+## Run
+
+```bash
+php examples/insurance/insurance.php
+```

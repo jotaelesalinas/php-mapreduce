@@ -187,74 +187,23 @@ class MapReduce
     {
         $this->checkProperties();
 
-        /** @var callable(mixed): bool|null $funcPreFilter */
-        $funcPreFilter = $this->preFilter;
-        /** @var callable(mixed): mixed $funcMapper */
-        $funcMapper = $this->mapper;
-        /** @var callable(mixed): bool|null $funcPostFilter */
-        $funcPostFilter = $this->postFilter;
-        /** @var callable(mixed, mixed): mixed $funcReducer */
-        $funcReducer = $this->reducer;
-        /** @var callable(mixed): mixed|null $funcGroupBy */
-        $funcGroupBy = $this->groupBy;
-        /** @var callable(int, mixed, mixed): void|null $funcProgress */
-        $funcProgress = $this->progress;
+        /** @var array<array-key, iterable<mixed>> $input */
+        $input = $this->input ?? [];
+        /** @var callable(mixed): mixed $mapper */
+        $mapper = $this->mapper;
+        /** @var callable(mixed, mixed): mixed $reducer */
+        $reducer = $this->reducer;
 
-        $reduced = [];
-        $countProcessed = 0;
-
-        foreach ($this->mergeInputs() as $item) {
-            if ($item === null) {
-                continue;
-            }
-
-            if ($funcPreFilter !== null && !$funcPreFilter($item)) {
-                continue;
-            }
-
-            $mapped = $funcMapper($item);
-
-            if ($mapped === null) {
-                continue;
-            }
-
-            if ($funcPostFilter !== null && !$funcPostFilter($mapped)) {
-                continue;
-            }
-
-            $key = $funcGroupBy === null ? self::NO_KEY : $funcGroupBy($mapped);
-            $reduced[$key] = $funcReducer($reduced[$key] ?? null, $mapped);
-            $countProcessed++;
-
-            if ($funcProgress !== null) {
-                $funcProgress($countProcessed, $item, $mapped);
-            }
-        }
-
-        if (count($this->output) > 0) {
-            foreach ($this->output as $output) {
-                foreach ($reduced as $item) {
-                    if ($output instanceof Generator) {
-                        $output->send($item);
-
-                        continue;
-                    }
-
-                    $output->write($item);
-                }
-
-                if ($output instanceof Generator) {
-                    $output->send(null);
-                    continue;
-                }
-
-                $output->close();
-            }
-        }
-
-        return count($reduced) === 1 && array_key_exists(self::NO_KEY, $reduced)
-            ? array_values($reduced)
-            : $reduced;
+        return (new MapReduceJob(
+            $input,
+            $this->preFilter,
+            $mapper,
+            $this->postFilter,
+            $this->groupBy,
+            $reducer,
+            $this->progress,
+            $this->output,
+        ))->execute();
     }
 
     private function applyConfig(string $key, mixed $value): void
