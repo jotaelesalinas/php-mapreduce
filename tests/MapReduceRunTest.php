@@ -1,54 +1,31 @@
 <?php
 
-namespace MapReduce\Tests;
+declare(strict_types=1);
 
-use MapReduce\MapReduce;
+namespace JLSalinas\SimpleMapReduce\Tests;
 
-$adapterDob2Age = function (iterable $original) {
-    foreach ($original as $item) {
-        // let´s say we are in the year 2020
-        $age = isset($item['birthday']) ? 2020 - explode('-', $item['birthday'])[0] : null;
-        if ($age !== null) {
-            $item['age'] = $age;
-        }
-        yield $item;
-    }
-};
+use JLSalinas\SimpleMapReduce\MapReduce;
+use InvalidArgumentException;
 
-class MapReduceRunTest extends MapReduceRunTestBase
-{
-    public function testAges()
-    {
-        $result = MapReduce::create()
-            ->setInput($this->data1)
-            ->setMapper($this->mapEq)
-            ->setReducer($this->reduceAgeSum)
-            ->run();
-        $this->assertIsArray($result);
-        $this->assertEquals($result, [["count" => 11, "sum" => 330]]);
-    }
-    
-    public function testAgesWithAdapter()
-    {
-        global $adapterDob2Age;
-        $result = MapReduce::create()
-            ->setInput($adapterDob2Age($this->data3))
-            ->setMapper($this->mapEq)
-            ->setReducer($this->reduceAgeSum)
-            ->run();
-        $this->assertIsArray($result);
-        $this->assertEquals($result, [["count" => 5, "sum" => 190]]);
-    }
+use function expect;
 
-    public function testAgesMulti()
-    {
-        global $adapterDob2Age;
-        $result = MapReduce::create()
-            ->setInput($this->data1, $this->data2, $adapterDob2Age($this->data3))
-            ->setMapper($this->mapEq)
-            ->setReducer($this->reduceAgeSum)
-            ->run();
-        $this->assertIsArray($result);
-        $this->assertEquals($result, [["count" => 20, "sum" => 689]]);
-    }
-}
+it('requires input', function (): void {
+    expect(fn (): array => MapReduce::create()
+        ->setMapper(fn (mixed $item): mixed => $item)
+        ->setReducer(fn (mixed $carry, mixed $item): mixed => $item)
+        ->run())->toThrow(InvalidArgumentException::class, 'Missing input.');
+});
+
+it('requires mapper', function (): void {
+    expect(fn (): array => MapReduce::create()
+        ->setInput([1, 2])
+        ->setReducer(fn (mixed $carry, mixed $item): mixed => $item)
+        ->run())->toThrow(InvalidArgumentException::class, 'Missing mapper function.');
+});
+
+it('requires reducer', function (): void {
+    expect(fn (): array => MapReduce::create()
+        ->setInput([1, 2])
+        ->setMapper(fn (mixed $item): mixed => $item)
+        ->run())->toThrow(InvalidArgumentException::class, 'Missing reducer function.');
+});

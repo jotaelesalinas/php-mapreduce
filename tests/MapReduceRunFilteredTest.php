@@ -1,34 +1,31 @@
 <?php
 
-namespace MapReduce\Tests;
+declare(strict_types=1);
 
-use MapReduce\MapReduce;
+namespace JLSalinas\SimpleMapReduce\Tests;
 
-class MapReduceRunFilteredTest extends MapReduceRunTestBase
-{
-    public function testPreFilterByGender()
-    {
-        $funcAdapter = $this->adapterDob2Age;
-        $result = MapReduce::create()
-            ->setInput($this->data1, $this->data2)
-            ->setPreFilter(fn($x) => $x['gender'] === 'f')
-            ->setMapper($this->mapEq)
-            ->setReducer($this->reduceAgeSum)
-            ->run();
-        $this->assertIsArray($result);
-        $this->assertEquals($result, [["count" => 5, "sum" => 146]]);
-    }
-    
-    public function testPreFilterByAge()
-    {
-        $funcAdapter = $this->adapterDob2Age;
-        $result = MapReduce::create()
-            ->setInput($this->data1, $this->data2)
-            ->setMapper($this->mapEq)
-            ->setPostFilter(fn($x) => $x['age'] >= 40)
-            ->setReducer($this->reduceAgeSum)
-            ->run();
-        $this->assertIsArray($result);
-        $this->assertEquals($result, [["count" => 3, "sum" => 134]]);
-    }
-}
+use JLSalinas\SimpleMapReduce\MapReduce;
+
+use function expect;
+
+it('runs with pre and post filters', function (): void {
+    $result = MapReduce::create()
+        ->setInput([1, 2, 3, 4, 5, 6])
+        ->setPreFilter(fn (mixed $item): bool => $item % 2 === 0)
+        ->setMapper(fn (mixed $item): mixed => $item * 2)
+        ->setPostFilter(fn (mixed $item): bool => $item > 5)
+        ->setReducer(fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
+        ->run();
+
+    expect($result)->toBe([20]);
+});
+
+it('skips null mapped values', function (): void {
+    $result = MapReduce::create()
+        ->setInput([1, 2, 3])
+        ->setMapper(fn (mixed $item): mixed => $item === 2 ? null : $item)
+        ->setReducer(fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
+        ->run();
+
+    expect($result)->toBe([4]);
+});

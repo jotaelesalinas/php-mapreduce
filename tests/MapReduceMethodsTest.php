@@ -1,57 +1,25 @@
 <?php
-namespace MapReduce\Tests;
 
-use PHPUnit\Framework\TestCase;
-use MapReduce\MapReduce;
+declare(strict_types=1);
 
-function accessProtected($obj, $prop)
-{
-    $reflection = new \ReflectionClass($obj);
-    $property = $reflection->getProperty($prop);
-    $property->setAccessible(true);
-    return $property->getValue($obj);
-}
+namespace JLSalinas\SimpleMapReduce\Tests;
 
-class MapReduceMethodsTest extends TestCase
-{
-    public function testInputAcceptsIterable()
-    {
-        $arr1 = [1,2,3,4,5];
-        $arr2 = [6,7,8];
+use JLSalinas\SimpleMapReduce\MapReduce;
+use InvalidArgumentException;
 
-        $mr = new MapReduce();
-        $mr->setInput($arr1);
-        $input = accessProtected($mr, 'input');
-        $this->assertNotNull($input);
-        $this->assertIsArray($input);
-        $this->assertTrue(count($input) === 1);
-        $this->assertEquals($input[0], $arr1);
+use function expect;
 
-        $mr = new MapReduce();
-        $mr->setInput($arr1, $arr2);
-        $input = accessProtected($mr, 'input');
-        $this->assertNotNull($input);
-        $this->assertIsArray($input);
-        $this->assertTrue(count($input) === 2);
-        $this->assertEquals($input[0], $arr1);
-        $this->assertEquals($input[1], $arr2);
-    }
-    
-    public function testGroupByToFunction()
-    {
-        // groupBy can be int|string|callable|null
-        $mr = new MapReduce();
+it('creates and runs from config data', function (): void {
+    $result = MapReduce::createAndRun([
+        'input' => [1, 2, 3],
+        'mapper' => fn (mixed $item): mixed => $item * 2,
+        'reducer' => fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item,
+    ]);
 
-        $mr->setGroupBy(1);
-        $groupBy = accessProtected($mr, 'groupBy');
-        $this->assertIsCallable($groupBy);
+    expect($result)->toBe([12]);
+});
 
-        $mr->setGroupBy('key1');
-        $groupBy = accessProtected($mr, 'groupBy');
-        $this->assertIsCallable($groupBy);
-
-        $mr->setGroupBy(null);
-        $groupBy = accessProtected($mr, 'groupBy');
-        $this->assertIsCallable($groupBy);
-    }
-}
+it('rejects unknown config data', function (): void {
+    expect(fn (): MapReduce => MapReduce::create(['unknown' => true]))
+        ->toThrow(InvalidArgumentException::class, "Wrong data field 'unknown'.");
+});

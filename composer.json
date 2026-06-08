@@ -1,49 +1,62 @@
 {
-    "name": "jotaelesalinas/php-mapreduce",
+    "name": "jotaelesalinas/php-simple-mapreduce",
     "type": "library",
-    "description": "A local implementation of the map-reduce strategy in PHP",
+    "description": "A simple in-memory map/reduce engine for PHP iterables, without workers or configuration.",
     "keywords": [
-        "php-mapreduce",
         "php",
         "mapreduce",
         "map-reduce",
-        "map",
-        "reduce",
-        "non-distributed"
+        "aggregation",
+        "iterable",
+        "generator",
+        "pipeline",
+        "in-memory",
+        "data-processing",
+        "simple"
     ],
-    "homepage": "https://github.com/jotaelesalinas/php-mapreduce",
+    "homepage": "https://github.com/jotaelesalinas/php-simple-mapreduce",
     "license": "MIT",
     "authors": [
         {
             "name": "José Luis Salinas",
             "email": "jotaelesalinas@example.com",
-            "homepage": "http://github.com/jotaelesalinas",
+            "homepage": "https://github.com/jotaelesalinas",
             "role": "Developer"
         }
     ],
     "require": {
-        "php": ">=8.0"
+        "php": "^8.1"
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5",
-        "squizlabs/php_codesniffer": "^3.7"
+        "friendsofphp/php-cs-fixer": "^3.60",
+        "pestphp/pest": "^2.36",
+        "phpstan/phpstan": "^1.12"
     },
     "autoload": {
         "psr-4": {
-            "MapReduce\\": "src/"
+            "JLSalinas\\SimpleMapReduce\\": "src/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "MapReduce\\Tests\\": "tests/"
+            "JLSalinas\\SimpleMapReduce\\Tests\\": "tests/"
         }
     },
     "scripts": {
-        "test": "phpunit",
-        "format": "phpcbf --standard=psr2 src/ tests/",
-        "format-win": "phpcbf --standard=psr2 --no-patch src/ tests/"
+        "test": "pest",
+        "analyse": "phpstan analyse --no-progress",
+        "format": "php-cs-fixer fix --config=.php-cs-fixer.php --dry-run --diff",
+        "format:fix": "php-cs-fixer fix --config=.php-cs-fixer.php",
+        "check": [
+            "@analyse",
+            "@test",
+            "@format"
+        ]
     },
     "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        },
         "sort-packages": true
     }
 }
