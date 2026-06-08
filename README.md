@@ -41,6 +41,29 @@ $result = MapReduce::create()
 var_dump($result);
 ```
 
+If you prefer a reusable callable, the same pipeline works with named
+functions or static methods:
+
+```php
+$doublerFn = static fn (mixed $item): mixed => $item * 2;
+
+final class Stats
+{
+    public static function max(?int $carry, int $item): int
+    {
+        return $carry === null
+            ? $item
+            : max($carry, $item);
+    }
+}
+
+$result = MapReduce::create()
+    ->setInput([1, 2, 3, 4, 5])
+    ->setMapper($doublerFn)
+    ->setReducer([Stats::class, 'max'])
+    ->run();
+```
+
 ## Semantics
 
 - `setInput()` accepts one or more `iterable` sources.
