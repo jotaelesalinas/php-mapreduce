@@ -11,14 +11,14 @@ use function expect;
 it('reports progress per processed item', function (): void {
     $events = [];
 
-    $result = MapReduce::crear()
-        ->entrada([1, 2, 3])
-        ->map(static fn (mixed $item): mixed => $item * 2)
-        ->reduce(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
-        ->progreso(static function (int $count, mixed $original, mixed $mapped) use (&$events): void {
+    $result = MapReduce::create()
+        ->setInput([1, 2, 3])
+        ->setMapper(static fn (mixed $item): mixed => $item * 2)
+        ->setReducer(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
+        ->setProgress(static function (int $count, mixed $original, mixed $mapped) use (&$events): void {
             $events[] = [$count, $original, $mapped];
         })
-        ->ejecutar();
+        ->run();
 
     expect($result)->toBe([12]);
     expect($events)->toBe([

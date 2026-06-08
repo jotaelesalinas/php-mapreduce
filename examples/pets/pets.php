@@ -27,22 +27,22 @@ $pets = [
     ['name' => 'Sting', 'species' => 'cat', 'revenue' => 70.00],
 ];
 
-$result = MapReduce::crear()
-    ->entrada($pets)
-    ->map(static fn (mixed $pet): mixed => [
+$result = MapReduce::create()
+    ->setInput($pets)
+    ->setMapper(static fn (mixed $pet): mixed => [
         'species' => $pet['species'],
         'revenue' => $pet['revenue'],
         'count' => 1,
     ])
-    ->agrupar(static fn (mixed $item): string => $item['species'])
-    ->reduce(static fn (mixed $carry, mixed $item): mixed => $carry === null
+    ->setGroupBy(static fn (mixed $item): string => $item['species'])
+    ->setReducer(static fn (mixed $carry, mixed $item): mixed => $carry === null
         ? $item
         : [
             'species' => $carry['species'],
             'revenue' => $carry['revenue'] + $item['revenue'],
             'count' => $carry['count'] + $item['count'],
         ])
-    ->salida(new ConsoleWriter())
-    ->ejecutar();
+    ->setOutput(new ConsoleWriter())
+    ->run();
 
 var_dump($result);

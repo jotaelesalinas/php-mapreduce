@@ -45,14 +45,6 @@ class MapReduce
     }
 
     /**
-     * @param array<string, mixed>|null $data
-     */
-    public static function crear(?array $data = null): self
-    {
-        return self::create($data);
-    }
-
-    /**
      * @param array<string, mixed> $data
      * @return array<array-key, mixed>
      */
@@ -69,14 +61,6 @@ class MapReduce
         $this->input = $input;
 
         return $this;
-    }
-
-    /**
-     * @param iterable<mixed> ...$input
-     */
-    public function entrada(iterable ...$input): self
-    {
-        return $this->setInput(...$input);
     }
 
     /**
@@ -99,11 +83,6 @@ class MapReduce
         return $this;
     }
 
-    public function map(callable $func): self
-    {
-        return $this->setMapper($func);
-    }
-
     /**
      * @param (callable(mixed): bool)|null $func
      */
@@ -112,11 +91,6 @@ class MapReduce
         $this->postFilter = $func;
 
         return $this;
-    }
-
-    public function filtrar(callable $func): self
-    {
-        return $this->setPostFilter($func);
     }
 
     /**
@@ -146,11 +120,6 @@ class MapReduce
         return $this;
     }
 
-    public function agrupar(int|string|callable|null $value): self
-    {
-        return $this->setGroupBy($value);
-    }
-
     /**
      * @param callable(mixed, mixed): mixed $func
      */
@@ -172,19 +141,6 @@ class MapReduce
     }
 
     /**
-     * @param callable(int, mixed, mixed): void|null $func
-     */
-    public function progreso(?callable $func): self
-    {
-        return $this->setProgress($func);
-    }
-
-    public function reduce(callable $func): self
-    {
-        return $this->setReducer($func);
-    }
-
-    /**
      * @param Generator<mixed, mixed, mixed, mixed> ...$output
      */
     public function setOutput(Generator|Writer ...$output): self
@@ -192,11 +148,6 @@ class MapReduce
         $this->output = $output;
 
         return $this;
-    }
-
-    public function salida(Generator|Writer ...$output): self
-    {
-        return $this->setOutput(...$output);
     }
 
     /**
@@ -304,14 +255,6 @@ class MapReduce
         return count($reduced) === 1 && array_key_exists(self::NO_KEY, $reduced)
             ? array_values($reduced)
             : $reduced;
-    }
-
-    /**
-     * @return array<array-key, mixed>
-     */
-    public function ejecutar(): array
-    {
-        return $this->run();
     }
 
     private function applyConfig(string $key, mixed $value): void

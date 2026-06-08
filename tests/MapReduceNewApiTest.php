@@ -9,12 +9,12 @@ use JLSalinas\SimpleMapReduce\Writer;
 
 use function expect;
 
-it('supports the new fluent api aliases', function (): void {
-    $result = MapReduce::crear()
-        ->entrada([1, 2, 3, 4])
-        ->map(static fn (mixed $item): mixed => $item * 2)
-        ->reduce(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
-        ->ejecutar();
+it('supports the fluent api', function (): void {
+    $result = MapReduce::create()
+        ->setInput([1, 2, 3, 4])
+        ->setMapper(static fn (mixed $item): mixed => $item * 2)
+        ->setReducer(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
+        ->run();
 
     expect($result)->toBe([20]);
 });
@@ -48,12 +48,12 @@ it('writes to a writer and closes it', function (): void {
         }
     };
 
-    $result = MapReduce::crear()
-        ->entrada([1, 2, 3])
-        ->map(static fn (mixed $item): mixed => $item)
-        ->reduce(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
-        ->salida($writer)
-        ->ejecutar();
+    $result = MapReduce::create()
+        ->setInput([1, 2, 3])
+        ->setMapper(static fn (mixed $item): mixed => $item)
+        ->setReducer(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
+        ->setOutput($writer)
+        ->run();
 
     expect($result)->toBe([6]);
     expect($written)->toBe([6]);
