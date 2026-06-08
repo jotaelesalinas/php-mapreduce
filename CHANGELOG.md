@@ -1,22 +1,22 @@
 # Changelog
 
-All Notable changes to `php-local-mapreduce` will be documented in this file.
+All notable changes to `php-simple-mapreduce` will be documented in this file.
 
-Updates should follow the [Keep a CHANGELOG](http://keepachangelog.com/) principles.
+The project follows Keep a Changelog and SemVer.
 
-## NEXT - YYYY-MM-DD
+## Unreleased
 
 ### Added
-- Nothing
+- Relaunch under the `jotaelesalinas/php-simple-mapreduce` package name.
+- Namespace migration to `JLSalinas\SimpleMapReduce`.
+- Pest, PHPStan, PHP-CS-Fixer, and GitHub Actions.
+
+### Changed
+- The repository is being modernized in place, preserving git history.
 
 ### Deprecated
-- Nothing
-
-### Fixed
-- Nothing
+- Historical documentation and examples still describe the old API in places.
 
 ### Removed
-- Nothing
+- Travis CI.
 
-### Security
-- Nothing
