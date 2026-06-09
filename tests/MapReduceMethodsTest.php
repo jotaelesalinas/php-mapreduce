@@ -52,16 +52,26 @@ it('rejects repeated method calls', function (): void {
         ->reduce(fn (mixed $carry, mixed $item): mixed => $item))->toThrow(InvalidArgumentException::class, "Method 'reduce' cannot be called more than once.");
 
     expect(fn (): MapReduce => MapReduce::create()
-        ->progress(static function (int $count, mixed $original, mixed $mapped): void {})
-        ->progress(static function (int $count, mixed $original, mixed $mapped): void {}))->toThrow(InvalidArgumentException::class, "Method 'progress' cannot be called more than once.");
+        ->progress(static function (int $count, mixed $original, mixed $mapped): void {
+        })
+        ->progress(static function (int $count, mixed $original, mixed $mapped): void {
+        }))->toThrow(InvalidArgumentException::class, "Method 'progress' cannot be called more than once.");
 
     expect(fn (): MapReduce => MapReduce::create()
-        ->output(new class implements \JLSalinas\SimpleMapReduce\Writer {
-            public function write(mixed $item): void {}
-            public function close(): void {}
+        ->output(new class () implements \JLSalinas\SimpleMapReduce\Writer {
+            public function write(mixed $item): void
+            {
+            }
+            public function close(): void
+            {
+            }
         })
-        ->output(new class implements \JLSalinas\SimpleMapReduce\Writer {
-            public function write(mixed $item): void {}
-            public function close(): void {}
+        ->output(new class () implements \JLSalinas\SimpleMapReduce\Writer {
+            public function write(mixed $item): void
+            {
+            }
+            public function close(): void
+            {
+            }
         }))->toThrow(InvalidArgumentException::class, "Method 'output' cannot be called more than once.");
 });
