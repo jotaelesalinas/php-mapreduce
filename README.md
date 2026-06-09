@@ -41,8 +41,8 @@ $result = MapReduce::create()
 var_dump($result);
 ```
 
-If you prefer a reusable callable, the same pipeline works with named
-functions or static methods:
+If you prefer a reusable callable, the same pipeline works with **any callable that matches the expected signature**: built-ins, named functions, static
+methods, closures, and invokable objects:
 
 ```php
 $doublerFn = static fn (mixed $item): mixed => $item * 2;
@@ -94,8 +94,18 @@ $result = MapReduce::create()
 
 ## Examples
 
-- [`examples/pets/pets.php`](examples/pets/pets.php)
-- [`examples/insurance/README.md`](examples/insurance/README.md)
+- [`examples/pets.php`](examples/pets.php)
+- [`examples/insurance.php`](examples/insurance.php)
+- [`examples/benchmark-big-dataset.php`](examples/benchmark-big-dataset.php)
+
+To run the examples locally from the repository root:
+
+```bash
+composer install
+php examples/pets.php
+php examples/insurance.php
+php examples/benchmark-big-dataset.php
+```
 
 ## Development
 
