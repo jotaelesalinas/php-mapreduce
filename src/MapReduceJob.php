@@ -16,7 +16,7 @@ final class MapReduceJob
     private $preFilter;
     /** @var callable(mixed): mixed */
     private $mapper;
-    /** @var (callable(mixed): bool)|null */
+    /** @var (callable(mixed, mixed): bool)|null */
     private $postFilter;
     /** @var mixed */
     private $groupBy;
@@ -31,7 +31,7 @@ final class MapReduceJob
      * @param array<array-key, iterable<mixed>> $input
      * @param (callable(mixed): bool)|null $preFilter
      * @param callable(mixed): mixed $mapper
-     * @param (callable(mixed): bool)|null $postFilter
+     * @param (callable(mixed, mixed): bool)|null $postFilter
      * @param mixed $groupBy
      * @param callable(mixed, mixed): mixed $reducer
      * @param callable(int, mixed, mixed): void|null $progress
@@ -80,11 +80,12 @@ final class MapReduceJob
                 continue;
             }
 
-            if ($this->postFilter !== null && !($this->postFilter)($mapped)) {
+            $key = $this->groupBy === null ? self::NO_KEY : ($this->groupBy)($mapped);
+
+            if ($this->postFilter !== null && !($this->postFilter)($mapped, $this->groupBy === null ? null : $key)) {
                 continue;
             }
 
-            $key = $this->groupBy === null ? self::NO_KEY : ($this->groupBy)($mapped);
             $reduced[$key] = ($this->reducer)($reduced[$key] ?? null, $mapped);
             $countProcessed++;
 

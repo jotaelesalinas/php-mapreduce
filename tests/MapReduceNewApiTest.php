@@ -11,12 +11,13 @@ use function expect;
 
 it('supports the fluent api', function (): void {
     $result = MapReduce::create()
-        ->setInput([1, 2, 3, 4])
-        ->setMapper(static fn (mixed $item): mixed => $item * 2)
-        ->setReducer(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
+        ->input([1, 2], [3, 4])
+        ->filterInput(static fn (mixed $item): bool => $item > 1, static fn (mixed $item): bool => $item < 5)
+        ->map(static fn (mixed $item): mixed => $item * 2, static fn (mixed $item): mixed => $item + 1)
+        ->reduce(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
         ->run();
 
-    expect($result)->toBe([20]);
+    expect($result)->toBe([21]);
 });
 
 it('writes to a writer and closes it', function (): void {
@@ -49,10 +50,10 @@ it('writes to a writer and closes it', function (): void {
     };
 
     $result = MapReduce::create()
-        ->setInput([1, 2, 3])
-        ->setMapper(static fn (mixed $item): mixed => $item)
-        ->setReducer(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
-        ->setOutput($writer)
+        ->input([1, 2, 3])
+        ->map(static fn (mixed $item): mixed => $item)
+        ->reduce(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
+        ->output($writer)
         ->run();
 
     expect($result)->toBe([6]);

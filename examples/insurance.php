@@ -59,11 +59,11 @@ $reducer = static function (mixed $carry, array $item): array {
 
 // The writer is responsible for rendering the reduced groups.
 $result = MapReduce::create()
-    ->setInput($policies)
-    ->setMapper($mapper)
-    ->setGroupBy(static fn (array $item): string => strtolower($item['state'] . ' ' . $item['county']))
-    ->setReducer($reducer)
-    ->setOutput(new JsonLineWriter())
+    ->input($policies)
+    ->map($mapper)
+    ->groupBy(static fn (array $item): string => strtolower($item['state'] . ' ' . $item['county']))
+    ->reduce($reducer)
+    ->output(new JsonLineWriter())
     ->run();
 
 var_export($result);

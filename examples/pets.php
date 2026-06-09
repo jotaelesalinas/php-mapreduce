@@ -24,21 +24,21 @@ $invoices_this_month = [
 
 // Keep only the fields needed for grouping and aggregation.
 $result = MapReduce::create()
-    ->setInput($invoices_this_month)
-    ->setMapper(static fn (mixed $invoice): mixed => [
+    ->input($invoices_this_month)
+    ->map(static fn (mixed $invoice): mixed => [
         'species' => $invoice['species'],
         'amount' => $invoice['amount'],
     ])
     // Group by the field that identifies the aggregation bucket.
-    ->setGroupBy(static fn (mixed $item): string => $item['species'])
+    ->groupBy(static fn (mixed $item): string => $item['species'])
     // Reduce each group into totals.
-    ->setReducer(static fn (mixed $carry, mixed $item): mixed => [
+    ->reduce(static fn (mixed $carry, mixed $item): mixed => [
         'species' => $item['species'],
         'amount' => ($carry['amount'] ?? 0) + $item['amount'],
         'count' => ($carry['count'] ?? 0) + 1,
     ])
     // Send the reduced output to a writer so the example shows both sides.
-    ->setOutput(new ConsoleWriter())
+    ->output(new ConsoleWriter())
     ->run();
 
 var_dump($result);

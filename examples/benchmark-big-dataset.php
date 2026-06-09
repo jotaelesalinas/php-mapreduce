@@ -72,14 +72,14 @@ $streaming = benchmark('stream with map/reduce', static function () use ($expand
     $rows = rowsFromCsv($expandedFile);
 
     $result = MapReduce::create()
-        ->setInput($rows)
-        ->setMapper(static fn (array $row): array => [
+        ->input($rows)
+        ->map(static fn (array $row): array => [
             'cover_type' => (int) $row['cover_type'],
             'elevation' => (int) $row['elevation'],
             'slope' => (int) $row['slope'],
         ])
-        ->setGroupBy(static fn (array $item): string => (string) $item['cover_type'])
-        ->setReducer(static fn (mixed $carry, array $item): array => [
+        ->groupBy(static fn (array $item): string => (string) $item['cover_type'])
+        ->reduce(static fn (mixed $carry, array $item): array => [
             'cover_type' => $item['cover_type'],
             'count' => ($carry['count'] ?? 0) + 1,
             'elevation_sum' => ($carry['elevation_sum'] ?? 0) + $item['elevation'],

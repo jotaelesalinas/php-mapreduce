@@ -33,9 +33,9 @@ declare(strict_types=1);
 use JLSalinas\SimpleMapReduce\MapReduce;
 
 $result = MapReduce::create()
-    ->setInput([1, 2, 3, 4, 5])
-    ->setMapper(static fn (mixed $item): mixed => $item * 2)
-    ->setReducer(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
+    ->input([1, 2, 3, 4, 5])
+    ->map(static fn (mixed $item): mixed => $item * 2)
+    ->reduce(static fn (mixed $carry, mixed $item): mixed => ($carry ?? 0) + $item)
     ->run();
 
 var_dump($result);
@@ -58,30 +58,36 @@ final class Stats
 }
 
 $result = MapReduce::create()
-    ->setInput([1, 2, 3, 4, 5])
-    ->setMapper($doublerFn)
-    ->setReducer([Stats::class, 'max'])
+    ->input([1, 2, 3, 4, 5])
+    ->map($doublerFn)
+    ->reduce([Stats::class, 'max'])
     ->run();
 ```
 
 ## Semantics
 
-- `setInput()` accepts one or more `iterable` sources.
-- `setMapper()` transforms each input item before reduction.
-- `setReducer()` receives the previous carry value and the mapped item.
-- `setGroupBy()` can group by array key, object property, or callback.
-- `setProgress()` receives the processed count, original item, and mapped item.
-- `setOutput()` can write reduced results to one or more `Writer` instances.
+- `input()` accepts one or more `iterable` sources.
+- The pipeline runs in this order: input, input filter, mapper, group key, mapped filter, reducer.
+- `filterInput()` receives the raw input item and decides whether it enters the mapper.
+- `map()` transforms each input item before reduction.
+- `groupBy()` can group by array key, object property, or callback.
+- `filterMapped()` receives the mapped item and, when grouping is enabled, the computed group key.
+- `reduce()` receives the previous carry value and the mapped item.
+- `progress()` receives the processed count, original item, and mapped item.
+- `output()` can write reduced results to one or more `Writer` instances.
 
 ## Fluent API
 
 ```php
 $result = MapReduce::create()
-    ->setInput($items)
-    ->setMapper($mapper)
-    ->setReducer($reducer)
-    ->setProgress($progressCallback)
-    ->setOutput($writer)
+    ->input($items)
+    ->filterInput($inputFilter)
+    ->map($mapper)
+    ->groupBy($groupBy)
+    ->filterMapped($mappedFilter)
+    ->reduce($reducer)
+    ->progress($progressCallback)
+    ->output($writer)
     ->run();
 ```
 

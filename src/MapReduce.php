@@ -28,6 +28,15 @@ class MapReduce
     /** @var array<array-key, Generator<mixed, mixed, mixed, mixed>|Writer> */
     protected array $output = [];
 
+    private bool $inputConfigured = false;
+    private bool $preFilterConfigured = false;
+    private bool $mapperConfigured = false;
+    private bool $postFilterConfigured = false;
+    private bool $groupByConfigured = false;
+    private bool $reducerConfigured = false;
+    private bool $progressConfigured = false;
+    private bool $outputConfigured = false;
+
     /**
      * @param array<string, mixed>|null $data
      */
@@ -56,39 +65,47 @@ class MapReduce
     /**
      * @param iterable<mixed> ...$input
      */
-    public function setInput(iterable ...$input): self
+    public function input(iterable ...$input): self
     {
+        $this->assertNotConfigured('input', $this->inputConfigured);
         $this->input = $input;
+        $this->inputConfigured = true;
 
         return $this;
     }
 
     /**
-     * @param (callable(mixed): bool)|null $func
+     * @param callable(mixed): bool ...$func
      */
-    public function setPreFilter(?callable $func): self
+    public function filterInput(callable ...$func): self
     {
-        $this->preFilter = $func;
+        $this->assertNotConfigured('filterInput', $this->preFilterConfigured);
+        $this->preFilter = $this->composeUnaryFilters(array_values($func));
+        $this->preFilterConfigured = true;
 
         return $this;
     }
 
     /**
-     * @param callable(mixed): mixed $func
+     * @param callable(mixed): mixed ...$func
      */
-    public function setMapper(callable $func): self
+    public function map(callable ...$func): self
     {
-        $this->mapper = $func;
+        $this->assertNotConfigured('map', $this->mapperConfigured);
+        $this->mapper = $this->composeMappers(array_values($func));
+        $this->mapperConfigured = true;
 
         return $this;
     }
 
     /**
-     * @param (callable(mixed): bool)|null $func
+     * @param callable(mixed, mixed): bool ...$func
      */
-    public function setPostFilter(?callable $func): self
+    public function filterMapped(callable ...$func): self
     {
-        $this->postFilter = $func;
+        $this->assertNotConfigured('filterMapped', $this->postFilterConfigured);
+        $this->postFilter = $this->composeBinaryFilters(array_values($func));
+        $this->postFilterConfigured = true;
 
         return $this;
     }
@@ -96,8 +113,10 @@ class MapReduce
     /**
      * @param int|string|(callable(mixed): array-key)|null $value
      */
-    public function setGroupBy(int|string|callable|null $value): self
+    public function groupBy(int|string|callable|null $value): self
     {
+        $this->assertNotConfigured('groupBy', $this->groupByConfigured);
+
         $func = $value;
 
         if (is_numeric($value)) {
@@ -116,6 +135,7 @@ class MapReduce
         }
 
         $this->groupBy = $func;
+        $this->groupByConfigured = true;
 
         return $this;
     }
@@ -123,9 +143,11 @@ class MapReduce
     /**
      * @param callable(mixed, mixed): mixed $func
      */
-    public function setReducer(callable $func): self
+    public function reduce(callable $func): self
     {
+        $this->assertNotConfigured('reduce', $this->reducerConfigured);
         $this->reducer = $func;
+        $this->reducerConfigured = true;
 
         return $this;
     }
@@ -133,19 +155,23 @@ class MapReduce
     /**
      * @param callable(int, mixed, mixed): void|null $func
      */
-    public function setProgress(?callable $func): self
+    public function progress(?callable $func): self
     {
+        $this->assertNotConfigured('progress', $this->progressConfigured);
         $this->progress = $func;
+        $this->progressConfigured = true;
 
         return $this;
     }
 
     /**
-     * @param Generator<mixed, mixed, mixed, mixed> ...$output
+     * @param Generator<mixed, mixed, mixed, mixed>|Writer ...$output
      */
-    public function setOutput(Generator|Writer ...$output): self
+    public function output(Generator|Writer ...$output): self
     {
+        $this->assertNotConfigured('output', $this->outputConfigured);
         $this->output = $output;
+        $this->outputConfigured = true;
 
         return $this;
     }
@@ -210,13 +236,25 @@ class MapReduce
     {
         switch ($key) {
             case 'preFilter':
+            case 'filterInput':
+            case 'map':
             case 'mapper':
+            case 'filterMapped':
             case 'postFilter':
             case 'groupBy':
+            case 'reduce':
             case 'reducer':
+            case 'progress':
             case 'input':
-                $funcName = 'set' . ucfirst($key);
-                $this->{$funcName}($value);
+                $method = match ($key) {
+                    'preFilter' => 'filterInput',
+                    'mapper', 'map' => 'map',
+                    'postFilter', 'filterMapped' => 'filterMapped',
+                    'reducer', 'reduce' => 'reduce',
+                    default => $key,
+                };
+
+                $this->{$method}($value);
 
                 return;
 
@@ -225,13 +263,13 @@ class MapReduce
                     throw new InvalidArgumentException("Wrong data field '$key'.");
                 }
 
-                $this->setInput(...$value);
+                $this->input(...$value);
 
                 return;
 
             case 'output':
-                if ($value instanceof Generator) {
-                    $this->setOutput($value);
+                if ($value instanceof Generator || $value instanceof Writer) {
+                    $this->output($value);
 
                     return;
                 }
@@ -240,7 +278,7 @@ class MapReduce
                     throw new InvalidArgumentException("Wrong data field '$key'.");
                 }
 
-                $this->setOutput(...$value);
+                $this->output(...$value);
 
                 return;
 
@@ -249,11 +287,79 @@ class MapReduce
                     throw new InvalidArgumentException("Wrong data field '$key'.");
                 }
 
-                $this->setOutput(...$value);
+                $this->output(...$value);
 
                 return;
         }
 
         throw new InvalidArgumentException("Wrong data field '$key'.");
+    }
+
+    /**
+     * @param array<int, callable(mixed): bool> $functions
+     * @return callable
+     */
+    private function composeUnaryFilters(array $functions): callable
+    {
+        if ($functions === []) {
+            throw new InvalidArgumentException('Missing callback.');
+        }
+
+        return static function (mixed ...$args) use ($functions): bool {
+            foreach ($functions as $func) {
+                if (!$func(...$args)) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+    }
+
+    /**
+     * @param array<int, callable(mixed, mixed): bool> $functions
+     * @return callable
+     */
+    private function composeBinaryFilters(array $functions): callable
+    {
+        if ($functions === []) {
+            throw new InvalidArgumentException('Missing callback.');
+        }
+
+        return static function (mixed $item, mixed $group = null) use ($functions): bool {
+            foreach ($functions as $func) {
+                if (!$func($item, $group)) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+    }
+
+    /**
+     * @param array<int, callable(mixed): mixed> $functions
+     * @return callable
+     */
+    private function composeMappers(array $functions): callable
+    {
+        if ($functions === []) {
+            throw new InvalidArgumentException('Missing callback.');
+        }
+
+        return static function (mixed $item) use ($functions): mixed {
+            foreach ($functions as $func) {
+                $item = $func($item);
+            }
+
+            return $item;
+        };
+    }
+
+    private function assertNotConfigured(string $method, bool $configured): void
+    {
+        if ($configured) {
+            throw new InvalidArgumentException("Method '$method' cannot be called more than once.");
+        }
     }
 }

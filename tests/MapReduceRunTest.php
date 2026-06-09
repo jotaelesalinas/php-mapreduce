@@ -11,21 +11,21 @@ use function expect;
 
 it('requires input', function (): void {
     expect(fn (): array => MapReduce::create()
-        ->setMapper(fn (mixed $item): mixed => $item)
-        ->setReducer(fn (mixed $carry, mixed $item): mixed => $item)
+        ->map(fn (mixed $item): mixed => $item)
+        ->reduce(fn (mixed $carry, mixed $item): mixed => $item)
         ->run())->toThrow(InvalidArgumentException::class, 'Missing input.');
 });
 
 it('requires mapper', function (): void {
     expect(fn (): array => MapReduce::create()
-        ->setInput([1, 2])
-        ->setReducer(fn (mixed $carry, mixed $item): mixed => $item)
+        ->input([1, 2])
+        ->reduce(fn (mixed $carry, mixed $item): mixed => $item)
         ->run())->toThrow(InvalidArgumentException::class, 'Missing mapper function.');
 });
 
 it('requires reducer', function (): void {
     expect(fn (): array => MapReduce::create()
-        ->setInput([1, 2])
-        ->setMapper(fn (mixed $item): mixed => $item)
+        ->input([1, 2])
+        ->map(fn (mixed $item): mixed => $item)
         ->run())->toThrow(InvalidArgumentException::class, 'Missing reducer function.');
 });
