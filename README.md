@@ -1,5 +1,10 @@
 # php-simple-mapreduce
 
+[!IMPORTANT]
+This is a breaking v2 release and is not compatible with the old
+`jotaelesalinas/php-mapreduce` package.
+The package name, namespace, and public API have changed.
+
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![License][ico-license]][link-license]
 [![CI][ico-ci]][link-ci]
