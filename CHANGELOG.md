@@ -12,9 +12,13 @@ The project follows Keep a Changelog and SemVer.
 - Package renamed to `jotaelesalinas/php-simple-mapreduce`.
 - Namespace changed to `JLSalinas\SimpleMapReduce`.
 - Pest, PHPStan, PHP-CS-Fixer, and GitHub Actions added.
+- `examples/benchmark-big-dataset.php` added to compare a streaming `MapReduce` pass against an eager in-memory aggregation.
+- Integration coverage added for `php-data-streams` readers and writers.
 
 ### Changed
-- README, examples, and code structure updated for the new package name and namespace.
+- `MapReduce::run()` now delegates execution to `MapReduceJob::execute()`, separating pipeline configuration from execution.
+- `MapReduce::input()`, `filterInput()`, `map()`, `filterMapped()`, `groupBy()`, `reduce()`, `progress()` and `output()` replaced the old setter-style API in the public documentation and examples.
+- `MapReduce::output()` and `MapReduceJob::execute()` now support `Writer` implementations in addition to generator outputs, so outputs are written through `write()` and finalized through `close()`.
 
 ### Deprecated
 - Historical documentation and examples still refer to the previous API in some sections.
@@ -25,28 +29,34 @@ The project follows Keep a Changelog and SemVer.
 ## v2.0.0
 
 ### Added
-- Fluent map/reduce aliases and progress callbacks added.
-- `MapReduceJob`, `Writer`, and `NullWriter` abstractions added.
-- Integration coverage and a large-dataset benchmark example added.
+- `MapReduce::create()` and `createAndRun()` added as entry points for array-based configuration and one-shot execution.
+- `MapReduce::setInput()` now accepts one or more `iterable` inputs directly.
+- `MapReduce::setPreFilter()` and `setPostFilter()` added to filter items before and after mapping.
+- `tests/MapReduceRunFilteredTest.php` added to cover pre-filter and post-filter execution.
+- JSON fixture files added to test grouped, filtered, and multi-input reductions without relying on inline arrays.
 
 ### Changed
-- README rewritten and examples updated for the new API.
-- Execution flow moved to the job-based model.
+- Namespace changed from `JLSalinas\MapReduce` to `MapReduce`.
+- `MapReduce::setGroupBy()` now normalizes integer and string selectors into callables, so grouped reductions work the same way for arrays and objects.
+- `MapReduce::run()` was simplified around `setInput()`, `setMapper()`, `setReducer()`, `setPreFilter()`, `setPostFilter()` and `setGroupBy()`, and the tests were rewritten around the new execution model.
+- Minimum PHP version raised to `>=8.0` and the package removed the runtime dependency on `jotaelesalinas/php-rwgen`.
+- README rewritten to document the simplified API, grouped reductions, filters, iterable inputs, and generator outputs.
 
 ### Removed
-- `DataAndCarry` and `ReaderAdapter` removed from the implementation path.
+- `inputMulti()` and `outputMulti()` removed from the public config array API.
+- `DataAndCarry`, `ReaderAdapter`, and their dedicated tests removed from the codebase.
 - Generated cache files removed.
 
 ## v2.0.0-beta.1
 
 ### Added
-- First release of the new fluent API.
-- Aliases for the old method names added.
-- Progress reporting hooks added.
+- Beta release of the simplified configuration API built around `MapReduce::create()`, `setInput()`, `setMapper()`, `setReducer()`, `setPreFilter()`, `setPostFilter()` and `setGroupBy()`.
+- Initial filtered and grouped test coverage for the refactored execution model.
 
 ### Changed
-- `MapReduce` refactored around the new execution model.
-- Examples and README updated for the public API.
+- Namespace changed from `JLSalinas\MapReduce` to `MapReduce` in the refactor branch that preceded `v2.0.0`.
+- `MapReduce::run()` was rewritten around iterable inputs, pre-filters, post-filters, and normalized group selectors.
+- README and tests were updated to exercise the refactored API before the final `v2.0.0` release.
 
 ## v1.0.5
 
@@ -57,8 +67,8 @@ The project follows Keep a Changelog and SemVer.
 ## v1.0.4
 
 ### Changed
-- Writer formatting and KML/HTML output refined.
-- Internal generator handling cleaned up.
+- `examples/pets/pets.php` updated the reducer example to document the reducer contract more precisely.
+- Grouped and ungrouped tests were updated so the expected reduction output reflects the current reducer behavior and numeric conversions.
 
 ## v.1.0.3
 
@@ -68,9 +78,14 @@ The project follows Keep a Changelog and SemVer.
 
 ## v1.0.2
 
+### Fixed
+- `MapReduce` grouped reductions now accept any callable in the group callback path instead of only `Closure`, fixing grouped runs that passed array callables or other valid PHP callables.
+- `MapReduce::run()` now sends a final `null` value to every configured output generator, fixing outputs that were not flushed or finalized after the last reduced item.
+- `ReaderAdapter::__construct()` now validates that the transform callback accepts exactly one required parameter, failing early instead of producing invalid adapter calls at runtime.
+
 ### Changed
-- Test layout split between grouped and ungrouped runs.
-- Reader adapter and README updated.
+- Test coverage split grouped and ungrouped runs into dedicated test cases to cover the grouped reducer path and adapter-based inputs separately.
+- README updated to match the grouped and ungrouped execution examples.
 
 ## v1.0.1
 
@@ -88,7 +103,9 @@ The project follows Keep a Changelog and SemVer.
 ## v0.2.1
 
 ### Fixed
-- Reader adapter behavior fixed for grouped and ungrouped runs.
+- `MapReduce` grouped reductions now accept any PHP callable in the group callback path, fixing grouped runs that failed when the callback was not a `Closure`.
+- `MapReduce::run()` now terminates each output generator with `send(null)`, fixing outputs that buffered data until an explicit close signal.
+- `ReaderAdapter::__construct()` now rejects transform callbacks with the wrong arity, fixing runtime failures caused by transforms that accepted no input item.
 
 ### Added
 - Coverage added for grouped and ungrouped execution paths.
