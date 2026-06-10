@@ -9,15 +9,15 @@ The project follows Keep a Changelog and SemVer.
 ## v3.0.0 - 2026-06-10
 
 ### Added
-- Relaunch under the `jotaelesalinas/php-simple-mapreduce` package name.
-- Namespace migration to `JLSalinas\SimpleMapReduce`.
-- Pest, PHPStan, PHP-CS-Fixer, and GitHub Actions.
+- Package renamed to `jotaelesalinas/php-simple-mapreduce`.
+- Namespace changed to `JLSalinas\SimpleMapReduce`.
+- Pest, PHPStan, PHP-CS-Fixer, and GitHub Actions added.
 
 ### Changed
-- The repository is being modernized in place, preserving git history.
+- README, examples, and code structure updated for the new package name and namespace.
 
 ### Deprecated
-- Historical documentation and examples still describe the old API in places.
+- Historical documentation and examples still refer to the previous API in some sections.
 
 ### Removed
 - Travis CI.
@@ -25,85 +25,85 @@ The project follows Keep a Changelog and SemVer.
 ## v2.0.0
 
 ### Added
-- Fluent map/reduce aliases and progress callbacks.
-- A `MapReduceJob` execution layer plus `Writer` and `NullWriter` abstractions.
-- Integration coverage for the new API and a benchmark example for large datasets.
+- Fluent map/reduce aliases and progress callbacks added.
+- `MapReduceJob`, `Writer`, and `NullWriter` abstractions added.
+- Integration coverage and a large-dataset benchmark example added.
 
 ### Changed
-- The README was rewritten as a landing page for the relaunch.
-- The examples were moved to the new API and adapted to the job-based execution flow.
+- README rewritten and examples updated for the new API.
+- Execution flow moved to the job-based model.
 
 ### Removed
-- The older `DataAndCarry` and `ReaderAdapter` implementation path.
-- Generated cache files that were no longer needed.
+- `DataAndCarry` and `ReaderAdapter` removed from the implementation path.
+- Generated cache files removed.
 
 ## v2.0.0-beta.1
 
 ### Added
-- A first cut of the new fluent API.
-- Aliases for the old method names to keep migrations manageable.
-- Progress reporting hooks.
+- First release of the new fluent API.
+- Aliases for the old method names added.
+- Progress reporting hooks added.
 
 ### Changed
-- The `MapReduce` implementation was refactored around the new execution model.
-- The examples and README were refreshed to match the new public API.
+- `MapReduce` refactored around the new execution model.
+- Examples and README updated for the public API.
 
 ## v1.0.5
 
 ### Changed
-- Example and test cleanup while keeping the existing API stable.
-- Composer and Travis configuration updates for newer PHP support.
+- Examples and tests cleaned up.
+- Composer and Travis configuration updated for newer PHP support.
 
 ## v1.0.4
 
 ### Changed
-- Writer formatting and KML/HTML output refinements.
-- Internal generator handling cleanup.
+- Writer formatting and KML/HTML output refined.
+- Internal generator handling cleaned up.
 
 ## v.1.0.3
 
 ### Changed
-- Console writer behavior was expanded and split into dedicated output formats.
-- Travis and project metadata were adjusted for the current toolchain.
+- Console writer behavior expanded and split into dedicated output formats.
+- Travis and project metadata updated.
 
 ## v1.0.2
 
 ### Changed
-- Test layout was split between grouped and ungrouped runs.
-- Reader adapter and README updates clarified the existing API.
+- Test layout split between grouped and ungrouped runs.
+- Reader adapter and README updated.
 
 ## v1.0.1
 
 ### Changed
-- Composer metadata and release hygiene updates.
+- Composer metadata and release files updated.
 
 ## v1.0.0
 
 ### Added
-- Console writer support and a stabilized public API.
+- Console writer support added and the public API stabilized.
 
 ### Changed
-- The insurance sample and documentation were updated for the 1.0 release.
+- Insurance sample and documentation updated.
 
 ## v0.2.1
 
 ### Fixed
-- Reader adapter behavior for grouped and ungrouped runs.
+- Reader adapter behavior fixed for grouped and ungrouped runs.
 
 ### Added
-- Coverage for grouped and ungrouped execution paths.
+- Coverage added for grouped and ungrouped execution paths.
 
 ## v0.2.0
 
 ### Added
-- A clearer public API for map/reduce jobs.
-- Sequential execution behavior and PSR-2 formatting.
+- Public API for map/reduce jobs added.
+- Sequential execution behavior and PSR-2 formatting added.
 
 ### Changed
-- The `ReducedDataCarry` model was renamed to `DataAndCarry`.
-- The README and examples were refreshed to match the new API.
+- `ReducedDataCarry` renamed to `DataAndCarry`.
+- README and examples updated for the API.
 
 ## v0.1.0
 
 ### Added
-- Initial map/reduce implementation and documentation.
+- Initial map/reduce implementation and documentation added.
