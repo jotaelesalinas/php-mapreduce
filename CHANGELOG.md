@@ -18,7 +18,7 @@ The project follows Keep a Changelog and SemVer.
 ### Changed
 - `MapReduce` execution is now split between pipeline setup and `MapReduceJob` execution.
 - `MapReduce` now uses the fluent API in the public documentation and examples instead of the old setter-style configuration.
-- `MapReduce` output now supports `Writer` implementations as well as generator outputs.
+- `MapReduce` output now supports `JLSalinas\DataStreams\Core\Writer` implementations from `jotaelesalinas/php-data-streams` as well as generator outputs.
 
 ### Deprecated
 - Historical documentation and examples still refer to the previous API in some sections.
