@@ -125,42 +125,47 @@ composer analyse
 composer format
 ```
 
-## Actualizando desde v2.x
+## Updating from v2.x
 
-Si vienes de `v2.x`, estas son las diferencias más importantes que debes
-revisar:
+If you are coming from `v2.x`, these are the main changes to review:
 
-- El namespace ahora es `JLSalinas\SimpleMapReduce`. Si en tu código tenías
-  algo como:
+- The namespace is now `JLSalinas\SimpleMapReduce`. If your code still has
+  imports like:
 
   ```php
   use JLSalinas\MapReduce\MapReduce;
   ```
 
-  cámbialo por:
+  change them to:
 
   ```php
   use JLSalinas\SimpleMapReduce\MapReduce;
   ```
 
-- El API público se ha modernizado hacia una configuración fluida. Si antes
-  construías la instancia con setters o métodos de configuración explícitos,
-  revisa la sección [Fluent API](#fluent-api) y sustituye las llamadas antiguas
-  por sus equivalentes actuales. Por ejemplo, donde antes usarías
-  `.setInput(...)`, `.setMapper(...)` o `.setReducer(...)`, ahora lo normal es
-  encadenar `->input(...)`, `->map(...)` y `->reduce(...)`.
+- The public API has been modernized around a fluent pipeline. If your v2 code
+  used setters or explicit configuration methods, replace them with the current
+  chainable methods. For example, code that used `setInput()`, `setMapper()`,
+  and `setReducer()` should now use:
 
-- `progress()` y `output()` siguen existiendo, pero conviene volver a revisar
-  las firmas y el orden de ejecución si tu código dependía de efectos
-  secundarios. El comportamiento de un pipeline real es más fácil de validar
-  comparándolo con la sección [Semantics](#semantics) y con los tests de tu
-  proyecto.
+  ```php
+  MapReduce::create()
+      ->input($items)
+      ->map($mapper)
+      ->reduce($reducer)
+      ->run();
+  ```
 
-- Si quieres actualizar desde `jotaelesalinas/php-mapreduce`, primero pasa por
-  `v2.x` y luego aplica estos cambios. La migración completa implica tanto el
-  cambio de paquete como la revisión del API.
+- If your code used `setPreFilter()`, `setPostFilter()`, or `setGroupBy()`,
+  re-check the current method names and the execution order in
+  [Semantics](#semantics). These callbacks still exist conceptually, but the
+  surrounding pipeline is now organized differently.
 
-- Cambia la dependencia en Composer si sigues anclado al nombre anterior:
+- `progress()` and `output()` still exist, but you should re-test any code that
+  depends on side effects, callback order, or the exact shape of the reduced
+  output.
+
+- If you are still installing the old package name, switch Composer to the new
+  package:
 
   ```bash
   composer remove jotaelesalinas/php-mapreduce
