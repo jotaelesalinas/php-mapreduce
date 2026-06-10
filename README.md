@@ -1,9 +1,49 @@
 # php-simple-mapreduce
 
 [!IMPORTANT]
-This is a breaking v2 release and is not compatible with the old
-`jotaelesalinas/php-mapreduce` package.
-The package name, namespace, and public API have changed.
+This is a breaking v3 release.
+
+## Actualizando desde v2.x
+
+Si vienes de `v2.x`, estas son las diferencias más importantes que debes
+revisar:
+
+- El namespace ahora es `JLSalinas\SimpleMapReduce`. Si en tu código tenías
+  algo como:
+
+  ```php
+  use JLSalinas\MapReduce\MapReduce;
+  ```
+
+  cámbialo por:
+
+  ```php
+  use JLSalinas\SimpleMapReduce\MapReduce;
+  ```
+
+- El API público se ha modernizado hacia una configuración fluida. Si antes
+  construías la instancia con setters o métodos de configuración explícitos,
+  revisa la sección [Fluent API](#fluent-api) y sustituye las llamadas antiguas
+  por sus equivalentes actuales. Por ejemplo, donde antes usarías
+  `.setInput(...)`, `.setMapper(...)` o `.setReducer(...)`, ahora lo normal es
+  encadenar `->input(...)`, `->map(...)` y `->reduce(...)`.
+
+- `progress()` y `output()` siguen existiendo, pero conviene volver a revisar
+  las firmas y el orden de ejecución si tu código dependía de efectos
+  secundarios. El comportamiento de un pipeline real es más fácil de validar
+  comparándolo con la sección [Semantics](#semantics) y con los tests de tu
+  proyecto.
+
+- Si quieres actualizar desde `jotaelesalinas/php-mapreduce`, primero pasa por
+  `v2.x` y luego aplica estos cambios. La migración completa implica tanto el
+  cambio de paquete como la revisión del API.
+
+- Cambia la dependencia en Composer si sigues anclado al nombre anterior:
+
+  ```bash
+  composer remove jotaelesalinas/php-mapreduce
+  composer require jotaelesalinas/php-simple-mapreduce
+  ```
 
 [![Latest Version on Packagist][ico-version]][link-packagist]
 [![License][ico-license]][link-license]
@@ -126,12 +166,6 @@ composer test
 composer analyse
 composer format
 ```
-
-## Project status
-
-This repository is being modernized in place. The namespace, package name, and
-tooling have been updated; the remaining work is to keep refining the API and
-examples until the final plan is fully implemented.
 
 [ico-version]: https://img.shields.io/packagist/v/jotaelesalinas/php-simple-mapreduce.svg?style=flat-square
 [ico-license]: https://img.shields.io/badge/license-MIT-brightgreen.svg?style=flat-square
