@@ -4,7 +4,7 @@ All notable changes to `php-simple-mapreduce` will be documented in this file.
 
 The project follows Keep a Changelog and SemVer.
 
-## Unreleased
+## v3.0.0 - 2026-06-10
 
 ### Added
 - Relaunch under the `jotaelesalinas/php-simple-mapreduce` package name.
@@ -20,3 +20,4 @@ The project follows Keep a Changelog and SemVer.
 ### Removed
 - Travis CI.
 
+## Unreleased
